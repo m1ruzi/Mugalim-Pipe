@@ -166,14 +166,14 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4">
+    <div className="max-w-6xl mx-auto px-4 py-4 md:py-8">
       {/* Header — Минимализм */}
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center space-x-4 mb-6">
-          <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-lg">
-            <Award className="w-7 h-7 text-white" />
+      <div className="text-center mb-8 md:mb-12">
+        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-black rounded-2xl flex items-center justify-center shadow-lg">
+            <Award className="w-6 h-6 md:w-7 md:h-7 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-black">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black">
             Результаты анализа
           </h1>
           {results.aiReport && (
@@ -183,21 +183,21 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
             </div>
           )}
         </div>
-        <p className="text-xl text-black/40 font-light tracking-tight max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-black/40 font-light tracking-tight max-w-2xl mx-auto px-4">
           Комплексная оценка мастерства по 1000-балльной системе
         </p>
       </div>
 
       {/* Overall Score Card — Apple Style */}
-      <div className="bg-white rounded-[40px] p-10 border border-black/5 shadow-sm mb-10">
-        <div className="grid lg:grid-cols-3 gap-12 items-center">
+      <div className="bg-white rounded-[24px] md:rounded-[40px] p-6 md:p-10 border border-black/5 shadow-sm mb-8 md:mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12 items-center">
           
           {/* Score Circle — Черно-белый прогресс */}
-          <div className="flex flex-col items-center">
-            <div className="relative w-48 h-48 flex items-center justify-center rounded-full bg-black shadow-2xl">
+          <div className="flex flex-col items-center order-2 lg:order-1">
+            <div className="relative w-32 h-32 md:w-48 md:h-48 flex items-center justify-center rounded-full bg-black shadow-2xl">
               <div className="text-center z-10">
-                <span className="text-6xl font-bold text-white tracking-tighter">{results.totalScore}</span>
-                <div className="text-white/40 text-[11px] font-bold uppercase tracking-widest mt-1">баллов</div>
+                <span className="text-4xl md:text-6xl font-bold text-white tracking-tighter">{results.totalScore}</span>
+                <div className="text-white/40 text-[10px] md:text-[11px] font-bold uppercase tracking-widest mt-1">баллов</div>
               </div>
               {/* Круговой индикатор */}
               <svg className="absolute -rotate-90 w-full h-full p-2">
@@ -208,32 +208,32 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                   strokeLinecap="round"
                 />
               </svg>
-              <div className="absolute -top-2 -right-2 bg-white border-4 border-[#FBFBFB] px-4 py-1 rounded-full shadow-sm text-black font-black text-xl tracking-tighter">
+              <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-white border-2 md:border-4 border-[#FBFBFB] px-2 md:px-4 py-1 rounded-full shadow-sm text-black font-black text-sm md:text-xl tracking-tighter">
                 {results.grade}
               </div>
             </div>
-            <div className="mt-6 text-center">
-               <div className="text-2xl font-bold tracking-tighter">{results.percentage.toFixed(1)}%</div>
+            <div className="mt-4 md:mt-6 text-center">
+               <div className="text-xl md:text-2xl font-bold tracking-tighter">{results.percentage.toFixed(1)}%</div>
                <div className="text-xs font-bold uppercase tracking-widest text-black/30">Общий результат</div>
             </div>
           </div>
 
           {/* Summary Section */}
-          <div className="lg:col-span-2 space-y-8">
-            <h2 className="text-3xl font-semibold tracking-tight leading-tight text-black">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8 order-1 lg:order-2">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-tight text-black">
               {results.aiReport?.professionalReport?.executiveSummary || results.overallFeedback}
             </h2>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {/* Strengths */}
               <div>
-                <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-black/30 mb-4 flex items-center gap-2">
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-black/30 mb-3 md:mb-4 flex items-center gap-2">
                   <Star className="w-4 h-4" /> Сильные стороны
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {(results.aiReport?.professionalReport?.detailedAnalysis?.strengths || results.strengths).map((strength: string, index: number) => (
-                    <div key={index} className="flex items-start text-[15px] font-medium text-black/70">
-                      <div className="w-1.5 h-1.5 bg-black rounded-full mr-3 mt-2 flex-shrink-0"></div>
+                    <div key={index} className="flex items-start text-[14px] md:text-[15px] font-medium text-black/70">
+                      <div className="w-1.5 h-1.5 bg-black rounded-full mr-2 md:mr-3 mt-2 flex-shrink-0"></div>
                       <span>{strength}</span>
                     </div>
                   ))}
@@ -242,13 +242,13 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
               {/* Priority Areas */}
               <div>
-                <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-black/30 mb-4 flex items-center gap-2">
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-black/30 mb-3 md:mb-4 flex items-center gap-2">
                   <Target className="w-4 h-4" /> Области развития
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {(results.aiReport?.professionalReport?.detailedAnalysis?.areasForImprovement || results.priorityAreas).map((area: string, index: number) => (
-                    <div key={index} className="flex items-start text-[15px] font-medium text-black/40 italic">
-                      <div className="w-1.5 h-1.5 border border-black/20 rounded-full mr-3 mt-2 flex-shrink-0"></div>
+                    <div key={index} className="flex items-start text-[14px] md:text-[15px] font-medium text-black/40 italic">
+                      <div className="w-1.5 h-1.5 border border-black/20 rounded-full mr-2 md:mr-3 mt-2 flex-shrink-0"></div>
                       <span>{area}</span>
                     </div>
                   ))}
@@ -259,31 +259,31 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
         </div>
 
         {/* Action Buttons — Чистый стиль */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-12 pt-10 border-t border-black/5">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 md:mt-12 pt-8 md:pt-10 border-t border-black/5">
           <button 
             onClick={generatePDFReport}
-            className="flex items-center space-x-2 px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-neutral-800 transition-all shadow-xl active:scale-95"
+            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-black text-white font-bold rounded-full hover:bg-neutral-800 transition-all shadow-xl active:scale-95 text-sm md:text-base"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-4 h-4 md:w-5 md:h-5" />
             <span>Скачать AI-отчет</span>
           </button>
-          <button className="flex items-center space-x-2 px-8 py-4 bg-[#F5F5F7] text-black font-bold rounded-full hover:bg-black/5 transition-all">
-            <Share2 className="w-5 h-5 opacity-40" />
+          <button className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-[#F5F5F7] text-black font-bold rounded-full hover:bg-black/5 transition-all text-sm md:text-base">
+            <Share2 className="w-4 h-4 md:w-5 md:h-5 opacity-40" />
             <span>Поделиться</span>
           </button>
           <button 
             onClick={onReset}
-            className="flex items-center space-x-2 px-8 py-4 bg-white border border-black/10 text-black font-bold rounded-full hover:border-black transition-all"
+            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-white border border-black/10 text-black font-bold rounded-full hover:border-black transition-all text-sm md:text-base"
           >
-            <RotateCcw className="w-5 h-5 opacity-40" />
+            <RotateCcw className="w-4 h-4 md:w-5 md:h-5 opacity-40" />
             <span>Новый анализ</span>
           </button>
         </div>
       </div>
 
       {/* Tabs — Сегментированный контроль Apple */}
-      <div className="flex justify-center mb-12">
-        <div className="bg-[#F5F5F7] p-1.5 rounded-[20px] flex gap-1 shadow-inner overflow-x-auto no-scrollbar max-w-full">
+      <div className="flex justify-center mb-8 md:mb-12 px-4">
+        <div className="bg-[#F5F5F7] p-1 md:p-1.5 rounded-[16px] md:rounded-[20px] flex gap-1 shadow-inner overflow-x-auto no-scrollbar max-w-full">
           {[
             { key: 'overview', label: 'Обзор', icon: BarChart3 },
             { key: 'detailed', label: 'Детали', icon: TrendingUp },
@@ -294,13 +294,13 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`flex items-center space-x-2 px-6 py-2.5 rounded-[16px] text-sm font-bold transition-all whitespace-nowrap ${
+              className={`flex items-center space-x-1 md:space-x-2 px-3 md:px-6 py-2 md:py-2.5 rounded-[12px] md:rounded-[16px] text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'bg-black text-white shadow-lg'
                   : 'text-black/40 hover:text-black hover:bg-black/5'
               }`}
             >
-              <tab.icon className="w-4 h-4" />
+              <tab.icon className="w-3 h-3 md:w-4 md:h-4" />
               <span>{tab.label}</span>
             </button>
           ))}
@@ -309,26 +309,26 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
       {/* Tab Content — Overview */}
       {activeTab === 'overview' && (
-        <div className="grid md:grid-cols-2 gap-6 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-16 md:mb-20">
           {categories.map((category, index) => (
-            <div key={index} className="bg-white rounded-[32px] p-8 border border-black/5 shadow-sm hover:shadow-md transition-all group">
-              <div className="flex items-start justify-between mb-8">
-                <div className="flex items-center space-x-5">
-                  <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center shadow-lg">
-                    <category.icon className="w-7 h-7 text-white" />
+            <div key={index} className="bg-white rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-black/5 shadow-sm hover:shadow-md transition-all group">
+              <div className="flex items-start justify-between mb-6 md:mb-8">
+                <div className="flex items-center space-x-3 md:space-x-5">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-black flex items-center justify-center shadow-lg">
+                    <category.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold tracking-tight text-black">{category.title}</h3>
-                    <p className="text-sm text-black/30 font-medium">{category.description}</p>
+                    <h3 className="text-lg md:text-xl font-bold tracking-tight text-black">{category.title}</h3>
+                    <p className="text-xs md:text-sm text-black/30 font-medium">{category.description}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-black tracking-tighter">{category.data.score}</div>
+                  <div className="text-3xl md:text-4xl font-black tracking-tighter">{category.data.score}</div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-black/20">из {category.data.maxScore}</div>
                 </div>
               </div>
               
-              <div className="mb-6">
+              <div className="mb-4 md:mb-6">
                 <div className="w-full bg-[#F5F5F7] rounded-full h-2 overflow-hidden">
                   <div 
                     className="h-full bg-black transition-all duration-1000 ease-out"
@@ -337,7 +337,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                 </div>
               </div>
               
-              <p className="text-black/50 text-[15px] leading-relaxed font-light italic mb-6">
+              <p className="text-black/50 text-[14px] md:text-[15px] leading-relaxed font-light italic mb-4 md:mb-6">
                 "{(category.data as any).aiRecommendations?.[0] || category.data.recommendations[0]}"
               </p>
               

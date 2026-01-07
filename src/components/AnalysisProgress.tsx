@@ -155,46 +155,46 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
   const CurrentStepIcon = analysisSteps[currentStep]?.icon;
 
   return (
-    <div className="max-w-5xl mx-auto px-4">
+    <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
       {/* Header — Чистая типографика Apple */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-semibold tracking-tight text-black mb-3">
+      <div className="text-center mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-black mb-3">
           Выполняется AI-анализ
         </h1>
-        <p className="text-lg text-black/40 font-light mb-1">{fileName}</p>
-        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-black/5 rounded-full text-[11px] font-bold uppercase tracking-widest text-black/50">
+        <p className="text-base md:text-lg text-black/40 font-light mb-1 px-4">{fileName}</p>
+        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-black/5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-black/50">
           <Loader2 className="w-3 h-3 animate-spin" />
           <span>Обработка Google Gemini AI</span>
         </div>
       </div>
 
       {/* Индикаторы безопасности (ч/б стиль) */}
-      <div className="bg-[#F5F5F7] rounded-[24px] p-6 border border-black/[0.03] mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center shadow-sm">
-              <Wifi className="w-6 h-6 text-white" />
+      <div className="bg-[#F5F5F7] rounded-[20px] md:rounded-[24px] p-4 md:p-6 border border-black/[0.03] mb-6 md:mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-black rounded-2xl flex items-center justify-center shadow-sm">
+              <Wifi className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold text-black leading-tight">Secure API Integration</h3>
-              <p className="text-[13px] text-black/40">Yandex SpeechKit v3 + Gemini Cloud</p>
+              <h3 className="text-[14px] md:text-[15px] font-semibold text-black leading-tight">Secure API Integration</h3>
+              <p className="text-[12px] md:text-[13px] text-black/40">Yandex SpeechKit v3 + Gemini Cloud</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 text-black/60 bg-white px-4 py-2 rounded-xl border border-black/5 shadow-sm text-sm font-medium">
-            <CheckCircle className="w-4 h-4" />
+          <div className="flex items-center space-x-2 text-black/60 bg-white px-3 md:px-4 py-2 rounded-xl border border-black/5 shadow-sm text-xs md:text-sm font-medium">
+            <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
             <span>Шифрование активно</span>
           </div>
         </div>
       </div>
 
       {/* Main Progress Bar — Жирный черный стиль */}
-      <div className="bg-white rounded-[32px] p-8 border border-black/5 shadow-sm mb-8">
-        <div className="mb-10">
-          <div className="flex justify-between items-end mb-4 px-1">
-            <span className="text-[13px] font-bold uppercase tracking-widest text-black/30">Общий прогресс</span>
-            <span className="text-3xl font-semibold tracking-tighter">{Math.round(progress)}%</span>
+      <div className="bg-white rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-black/5 shadow-sm mb-6 md:mb-8">
+        <div className="mb-8 md:mb-10">
+          <div className="flex justify-between items-end mb-3 md:mb-4 px-1">
+            <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-black/30">Общий прогресс</span>
+            <span className="text-2xl md:text-3xl font-semibold tracking-tighter">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-[#F5F5F7] rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-[#F5F5F7] rounded-full h-2 md:h-3 overflow-hidden">
             <div 
               className="bg-black h-full transition-all duration-700 ease-in-out relative"
               style={{ width: `${progress}%` }}
@@ -205,9 +205,9 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
         </div>
 
         {/* Текущий этап */}
-        <div className="flex items-center space-x-6 bg-[#F5F5F7]/50 p-6 rounded-[24px] border border-black/[0.02]">
-          <div className="w-16 h-16 rounded-2xl bg-black flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-500">
-            {CurrentStepIcon && <CurrentStepIcon className="w-8 h-8 text-white" />}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-[#F5F5F7]/50 p-4 md:p-6 rounded-[20px] md:rounded-[24px] border border-black/[0.02]">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-black flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-500">
+            {CurrentStepIcon && <CurrentStepIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />}
           </div>
           <div>
             <h3 className="text-xl font-semibold text-black tracking-tight leading-none mb-2">
