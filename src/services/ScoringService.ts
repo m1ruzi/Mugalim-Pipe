@@ -101,6 +101,12 @@ class ScoringService {
     videoDuration: number
   ): Promise<ComprehensiveAnalysis> {
     
+    // Проверка на валидную длительность видео
+    if (!videoDuration || videoDuration <= 0 || isNaN(videoDuration)) {
+      console.warn('Invalid video duration, using fallback values');
+      return this.getFallbackAnalysis();
+    }
+    
     const postureMetrics = this.analyzePostureMetrics(poseData, videoDuration);
     const gesticulationMetrics = this.analyzeGesticulationMetrics(gestureData, videoDuration);
     const facialMetrics = this.analyzeFacialMetrics(faceData, videoDuration);
@@ -325,11 +331,17 @@ class ScoringService {
     const headTiltRatio = headTiltCount / frameCount;
     const avgMovement = movementVariance / (frameCount - 1);
 
+    // Проверка на NaN и установка дефолтных значений
+    const safeForwardLeanRatio = isNaN(forwardLeanRatio) ? 0 : forwardLeanRatio;
+    const safeShoulderAsymmetryRatio = isNaN(shoulderAsymmetryRatio) ? 0 : shoulderAsymmetryRatio;
+    const safeHeadTiltRatio = isNaN(headTiltRatio) ? 0 : headTiltRatio;
+    const safeAvgMovement = isNaN(avgMovement) ? 0 : avgMovement;
+
     // Расчет баллов (каждый компонент из 40 баллов)
-    spineAlignmentScore = Math.max(0, 40 - (forwardLeanRatio * 40));
-    shoulderSymmetryScore = Math.max(0, 40 - (shoulderAsymmetryRatio * 40));
-    headPositionScore = Math.max(0, 40 - (headTiltRatio * 40));
-    stabilityScore = Math.max(0, 40 - (avgMovement * 200)); // Нормализация движения
+    spineAlignmentScore = Math.max(0, 40 - (safeForwardLeanRatio * 40));
+    shoulderSymmetryScore = Math.max(0, 40 - (safeShoulderAsymmetryRatio * 40));
+    headPositionScore = Math.max(0, 40 - (safeHeadTiltRatio * 40));
+    stabilityScore = Math.max(0, 40 - (safeAvgMovement * 200)); // Нормализация движения
     confidenceScore = Math.min(40, (spineAlignmentScore + shoulderSymmetryScore) / 2);
 
     // Определение проблем
@@ -403,6 +415,9 @@ class ScoringService {
     const expressivenessRatio = totalGestures > 0 ? expressiveGestures / totalGestures : 0;
     const appropriatenessRatio = totalGestures > 0 ? appropriateGestures / totalGestures : 0;
 
+    // Проверка на NaN
+    const safeGestureFrequency = isNaN(gestureFrequency) ? 0 : gestureFrequency;
+
     // Анализ координации (равномерность распределения жестов)
     let coordinationScore = 40;
     if (gestureTimestamps.length > 1) {
@@ -417,7 +432,7 @@ class ScoringService {
 
     // Расчет баллов (каждый компонент из 40 баллов)
     const varietyScore = Math.min(40, gestureVariety * 8); // До 5 типов жестов
-    const frequencyScore = Math.min(40, gestureFrequency * 40); // Оптимально 1 жест в секунду
+    const frequencyScore = Math.min(40, safeGestureFrequency * 40); // Оптимально 1 жест в секунду
     const appropriatenessScore = appropriatenessRatio * 40;
     const expressivenessScore = expressivenessRatio * 40;
 
@@ -509,12 +524,18 @@ class ScoringService {
     const emotionalRangeScore = emotionalVariety.size;
     const authenticityRatio = authenticityScore / frameCount;
 
+    // Проверка на NaN
+    const safeSmileRatio = isNaN(smileRatio) ? 0 : smileRatio;
+    const safeEyeContactRatio = isNaN(eyeContactRatio) ? 0 : eyeContactRatio;
+    const safeExpressivenessRatio = isNaN(expressivenessRatio) ? 0 : expressivenessRatio;
+    const safeAuthenticityRatio = isNaN(authenticityRatio) ? 0 : authenticityRatio;
+
     // Расчет баллов (каждый компонент из 40 баллов)
-    const expressivenessScore = Math.min(40, expressivenessRatio * 80);
-    const eyeContactScore = eyeContactRatio * 40;
-    const smileFrequencyScore = Math.min(40, smileRatio * 60); // Оптимально 60% времени
+    const expressivenessScore = Math.min(40, safeExpressivenessRatio * 80);
+    const eyeContactScore = safeEyeContactRatio * 40;
+    const smileFrequencyScore = Math.min(40, safeSmileRatio * 60); // Оптимально 60% времени
     const emotionalRangeScoreNorm = Math.min(40, emotionalRangeScore * 20);
-    const authenticityScoreNorm = authenticityRatio * 40;
+    const authenticityScoreNorm = safeAuthenticityRatio * 40;
 
     const totalScore = expressivenessScore + eyeContactScore + smileFrequencyScore + 
                       emotionalRangeScoreNorm + authenticityScoreNorm;
@@ -549,21 +570,25 @@ class ScoringService {
     // Анализ слов-паразитов
     const fillerWords = ['эм', 'ах', 'ну', 'так', 'значит', 'короче', 'типа', 'как бы', 'вот', 'это'];
     const fillerCount = words.filter((word: string) => fillerWords.includes(word)).length;
-    const fillerRatio = fillerCount / wordCount;
+    const fillerRatio = wordCount > 0 ? fillerCount / wordCount : 0;
 
     // Анализ сложности словаря
-    const avgWordLength = words.reduce((sum: number, word: string) => sum + word.length, 0) / wordCount;
-    const vocabularyRichness = uniqueWordCount / wordCount;
+    const avgWordLength = wordCount > 0 ? words.reduce((sum: number, word: string) => sum + word.length, 0) / wordCount : 0;
+    const vocabularyRichness = wordCount > 0 ? uniqueWordCount / wordCount : 0;
 
     // Анализ грамматики (упрощенный)
     const sentences = mockTranscription.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
-    const avgSentenceLength = wordCount / sentences.length;
+    const sentenceCount = sentences.length;
+    const avgSentenceLength = sentenceCount > 0 ? wordCount / sentenceCount : 0;
+
+    // Проверка на NaN
+    const safeWordsPerMinute = isNaN(wordsPerMinute) ? 0 : wordsPerMinute;
 
     // Расчет баллов (каждый компонент из 40 баллов)
     let clarityScore = 40 - (fillerRatio * 80); // Штраф за слова-паразиты
     let paceScore = 40;
-    if (wordsPerMinute < 120) paceScore = (wordsPerMinute / 120) * 40;
-    else if (wordsPerMinute > 180) paceScore = 40 - ((wordsPerMinute - 180) / 60) * 20;
+    if (safeWordsPerMinute < 120) paceScore = (safeWordsPerMinute / 120) * 40;
+    else if (safeWordsPerMinute > 180) paceScore = 40 - ((safeWordsPerMinute - 180) / 60) * 20;
 
     const volumeScore = 35; // Базовая оценка, требует реального анализа аудио
     const vocabularyScore = Math.min(40, vocabularyRichness * 80 + avgWordLength * 5);
@@ -603,7 +628,7 @@ class ScoringService {
 
     // Анализ взаимодействия (жесты + мимика)
     let interactionScore = 0;
-    if (gestureData.length > 0 && faceData.length > 0) {
+    if (gestureData.length > 0 && faceData.length > 0 && videoDuration > 0) {
       const gestureActivity = Math.min(1, gestureData.length / (videoDuration * 10));
       const facialActivity = Math.min(1, faceData.length / (videoDuration * 30));
       interactionScore = (gestureActivity + facialActivity) * 20;
@@ -829,15 +854,24 @@ class ScoringService {
     if (poseData.length < 2) return 0.5;
     
     let totalMovement = 0;
+    let validFrames = 0;
     for (let i = 1; i < poseData.length; i++) {
       const curr = poseData[i].landmarks[0]; // nose
       const prev = poseData[i-1].landmarks[0];
-      const movement = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
-      totalMovement += movement;
+      if (curr && prev && typeof curr.x === 'number' && typeof curr.y === 'number' &&
+          typeof prev.x === 'number' && typeof prev.y === 'number' &&
+          !isNaN(curr.x) && !isNaN(curr.y) && !isNaN(prev.x) && !isNaN(prev.y)) {
+        const movement = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
+        if (!isNaN(movement)) {
+          totalMovement += movement;
+          validFrames++;
+        }
+      }
     }
     
-    const avgMovement = totalMovement / (poseData.length - 1);
-    return Math.max(0, 1 - (avgMovement * 50)); // Нормализация
+    if (validFrames === 0) return 0.5;
+    const avgMovement = totalMovement / validFrames;
+    return isNaN(avgMovement) ? 0.5 : Math.max(0, 1 - (avgMovement * 50)); // Нормализация
   }
 
   private calculateEyeContactRatio(faceData: any[]): number {
@@ -867,15 +901,118 @@ class ScoringService {
     if (poseData.length < 2) return 0.5;
     
     let totalMovement = 0;
+    let validFrames = 0;
     for (let i = 1; i < poseData.length; i++) {
       const curr = poseData[i].landmarks[0];
       const prev = poseData[i-1].landmarks[0];
-      const movement = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
-      totalMovement += movement;
+      if (curr && prev && typeof curr.x === 'number' && typeof curr.y === 'number' &&
+          typeof prev.x === 'number' && typeof prev.y === 'number' &&
+          !isNaN(curr.x) && !isNaN(curr.y) && !isNaN(prev.x) && !isNaN(prev.y)) {
+        const movement = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
+        if (!isNaN(movement)) {
+          totalMovement += movement;
+          validFrames++;
+        }
+      }
     }
     
-    const avgMovement = totalMovement / (poseData.length - 1);
-    return Math.min(1, avgMovement * 100); // Нормализация для динамики
+    if (validFrames === 0) return 0.5;
+    const avgMovement = totalMovement / validFrames;
+    return isNaN(avgMovement) ? 0.5 : Math.min(1, avgMovement * 100); // Нормализация для динамики
+  }
+
+  private getFallbackAnalysis(): ComprehensiveAnalysis {
+    return {
+      totalScore: 500,
+      percentage: 50,
+      grade: 'C',
+      metrics: {
+        posture: {
+          score: 100,
+          maxScore: 200,
+          spineAlignment: 50,
+          shoulderSymmetry: 50,
+          headPosition: 50,
+          stability: 50,
+          confidence: 50,
+          issues: ["Невозможно проанализировать позу"],
+          recommendations: ["Убедитесь, что видео корректно загружено"]
+        },
+        gesticulation: {
+          score: 100,
+          maxScore: 200,
+          variety: 20,
+          frequency: 20,
+          appropriateness: 20,
+          expressiveness: 20,
+          coordination: 20,
+          gestures: [],
+          recommendations: ["Невозможно проанализировать жесты"]
+        },
+        facial: {
+          score: 100,
+          maxScore: 200,
+          expressiveness: 50,
+          eyeContact: 50,
+          smileFrequency: 50,
+          emotionalRange: 50,
+          authenticity: 50,
+          expressions: [],
+          recommendations: ["Невозможно проанализировать мимику"]
+        },
+        speech: {
+          score: 100,
+          maxScore: 200,
+          clarity: 50,
+          pace: 50,
+          volume: 50,
+          fillerWords: 50,
+          engagement: 50,
+          transcription: "Анализ речи недоступен",
+          recommendations: ["Невозможно проанализировать речь"]
+        },
+        engagement: {
+          score: 100,
+          maxScore: 200,
+          overallEngagement: 50,
+          attentionSpan: 50,
+          interactionQuality: 50,
+          energyLevel: 50,
+          confidence: 50,
+          recommendations: ["Невозможно оценить вовлеченность"]
+        }
+      },
+      aiReport: {
+        professionalReport: {
+          executiveSummary: "Анализ невозможен из-за проблем с видео",
+          detailedAnalysis: {
+            strengths: [],
+            areasForImprovement: ["Проверьте формат и качество видео"],
+            keyInsights: []
+          },
+          recommendations: {
+            immediate: ["Повторите загрузку видео"],
+            shortTerm: [],
+            longTerm: []
+          },
+          actionPlan: {
+            week1: [],
+            week2: [],
+            week3: [],
+            week4: []
+          }
+        },
+        enhancedRecommendations: {
+          posture: [],
+          gesticulation: [],
+          facial: [],
+          speech: [],
+          engagement: []
+        },
+        motivationalMessage: "Попробуйте загрузить другое видео",
+        nextSteps: ["Проверьте видео на совместимость"]
+      }
+    };
   }
 }
 

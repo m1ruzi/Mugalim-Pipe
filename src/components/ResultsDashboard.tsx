@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { BarChart3, TrendingUp, Star, Download, Share2, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Lightbulb, Award, ChevronRight, Info, Sparkles, Zap, X } from 'lucide-react';
+import { BarChart3, TrendingUp, Star, Download, Share2, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Lightbulb, Award, ChevronRight, Info, Sparkles } from 'lucide-react';
 import { ComprehensiveAnalysis } from '../services/ScoringService';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface ResultsDashboardProps {
   results: ComprehensiveAnalysis;
@@ -9,6 +11,150 @@ interface ResultsDashboardProps {
 
 const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations' | 'ai-report' | 'analytics'>('overview');
+
+  const generatePDFReport = async () => {
+    if (!results.aiReport) {
+      alert('AI-отчет недоступен для скачивания');
+      return;
+    }
+
+    try {
+      console.log('Начинаем генерацию PDF...');
+
+      // Создаем временный HTML элемент с отчетом
+      const reportElement = document.createElement('div');
+      reportElement.style.width = '800px';
+      reportElement.style.padding = '40px';
+      reportElement.style.fontFamily = 'Arial, sans-serif';
+      reportElement.style.backgroundColor = 'white';
+      reportElement.style.color = 'black';
+      reportElement.innerHTML = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="font-size: 24px; margin-bottom: 10px;">AI Анализ мастерства преподавания</h1>
+          <p style="font-size: 18px;">Общий балл: ${results.totalScore}/1000 (${results.percentage.toFixed(1)}%)</p>
+          <p style="font-size: 16px;">Оценка: ${results.grade}</p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px;">Резюме:</h2>
+          <p style="line-height: 1.6;">${results.aiReport.professionalReport.executiveSummary}</p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px;">Сильные стороны:</h2>
+          <ul style="line-height: 1.8;">
+            ${results.aiReport.professionalReport.detailedAnalysis.strengths.map((s: string) => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px;">Области для улучшения:</h2>
+          <ul style="line-height: 1.8;">
+            ${results.aiReport.professionalReport.detailedAnalysis.areasForImprovement.map((a: string) => `<li>${a}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px;">Рекомендации:</h2>
+          
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Немедленные действия:</h3>
+          <ul style="line-height: 1.6; margin-bottom: 15px;">
+            ${results.aiReport.professionalReport.recommendations.immediate.map((r: string) => `<li>${r}</li>`).join('')}
+          </ul>
+
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Краткосрочные цели:</h3>
+          <ul style="line-height: 1.6; margin-bottom: 15px;">
+            ${results.aiReport.professionalReport.recommendations.shortTerm.map((r: string) => `<li>${r}</li>`).join('')}
+          </ul>
+
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Долгосрочные цели:</h3>
+          <ul style="line-height: 1.6;">
+            ${results.aiReport.professionalReport.recommendations.longTerm.map((r: string) => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="font-size: 18px; margin-bottom: 10px;">План действий:</h2>
+          
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Неделя 1:</h3>
+          <ul style="line-height: 1.6; margin-bottom: 10px;">
+            ${results.aiReport.professionalReport.actionPlan.week1.map((a: string) => `<li>${a}</li>`).join('')}
+          </ul>
+
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Неделя 2:</h3>
+          <ul style="line-height: 1.6; margin-bottom: 10px;">
+            ${results.aiReport.professionalReport.actionPlan.week2.map((a: string) => `<li>${a}</li>`).join('')}
+          </ul>
+
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Неделя 3:</h3>
+          <ul style="line-height: 1.6; margin-bottom: 10px;">
+            ${results.aiReport.professionalReport.actionPlan.week3.map((a: string) => `<li>${a}</li>`).join('')}
+          </ul>
+
+          <h3 style="font-size: 16px; margin-bottom: 5px;">Неделя 4:</h3>
+          <ul style="line-height: 1.6;">
+            ${results.aiReport.professionalReport.actionPlan.week4.map((a: string) => `<li>${a}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div>
+          <h2 style="font-size: 18px; margin-bottom: 10px;">Мотивация:</h2>
+          <p style="font-style: italic; line-height: 1.6;">${results.aiReport.motivationalMessage}</p>
+        </div>
+      `;
+
+      // Добавляем элемент в DOM временно
+      document.body.appendChild(reportElement);
+
+      // Конвертируем в canvas
+      console.log('Конвертируем HTML в canvas...');
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      // Удаляем временный элемент
+      document.body.removeChild(reportElement);
+
+      // Создаем PDF
+      console.log('Создаем PDF...');
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      // Добавляем первую страницу
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Добавляем дополнительные страницы если нужно
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Скачиваем PDF
+      console.log('Скачиваем PDF...');
+      pdf.save(`AI-отчет-анализа-${new Date().toISOString().split('T')[0]}.pdf`);
+      console.log('PDF успешно создан и скачан');
+
+    } catch (error) {
+      console.error('Ошибка генерации PDF:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      const errorStack = error instanceof Error ? error.stack : '';
+      console.error('Детали ошибки:', errorMessage, errorStack);
+      alert(`Ошибка при генерации PDF отчета: ${errorMessage}`);
+    }
+  };
 
   // Изменено: Больше нет цветового кодирования, всё в ч/б стиле
   const categories = [
@@ -85,7 +231,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                   <Star className="w-4 h-4" /> Сильные стороны
                 </h3>
                 <div className="space-y-3">
-                  {(results.aiReport?.professionalReport?.detailedAnalysis?.strengths || results.strengths).map((strength, index) => (
+                  {(results.aiReport?.professionalReport?.detailedAnalysis?.strengths || results.strengths).map((strength: string, index: number) => (
                     <div key={index} className="flex items-start text-[15px] font-medium text-black/70">
                       <div className="w-1.5 h-1.5 bg-black rounded-full mr-3 mt-2 flex-shrink-0"></div>
                       <span>{strength}</span>
@@ -100,7 +246,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                   <Target className="w-4 h-4" /> Области развития
                 </h3>
                 <div className="space-y-3">
-                  {(results.aiReport?.professionalReport?.detailedAnalysis?.areasForImprovement || results.priorityAreas).map((area, index) => (
+                  {(results.aiReport?.professionalReport?.detailedAnalysis?.areasForImprovement || results.priorityAreas).map((area: string, index: number) => (
                     <div key={index} className="flex items-start text-[15px] font-medium text-black/40 italic">
                       <div className="w-1.5 h-1.5 border border-black/20 rounded-full mr-3 mt-2 flex-shrink-0"></div>
                       <span>{area}</span>
@@ -114,7 +260,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
         {/* Action Buttons — Чистый стиль */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-12 pt-10 border-t border-black/5">
-          <button className="flex items-center space-x-2 px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-neutral-800 transition-all shadow-xl active:scale-95">
+          <button 
+            onClick={generatePDFReport}
+            className="flex items-center space-x-2 px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-neutral-800 transition-all shadow-xl active:scale-95"
+          >
             <Download className="w-5 h-5" />
             <span>Скачать AI-отчет</span>
           </button>
@@ -239,19 +388,19 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                <div>
                   <h5 className="text-sm font-bold uppercase tracking-widest mb-4">Срочно</h5>
                   <ul className="space-y-2 text-white/50 text-sm italic">
-                    {results.aiReport.professionalReport.recommendations.immediate.map((r, i) => <li key={i}>— {r}</li>)}
+                    {results.aiReport.professionalReport.recommendations.immediate.map((r: string, i: number) => <li key={i}>— {r}</li>)}
                   </ul>
                </div>
                <div>
                   <h5 className="text-sm font-bold uppercase tracking-widest mb-4">В планах</h5>
                   <ul className="space-y-2 text-white/50 text-sm">
-                    {results.aiReport.professionalReport.recommendations.shortTerm.map((r, i) => <li key={i}>• {r}</li>)}
+                    {results.aiReport.professionalReport.recommendations.shortTerm.map((r: string, i: number) => <li key={i}>• {r}</li>)}
                   </ul>
                </div>
                <div>
                   <h5 className="text-sm font-bold uppercase tracking-widest mb-4">Стратегия</h5>
                   <ul className="space-y-2 text-white/50 text-sm">
-                    {results.aiReport.professionalReport.recommendations.longTerm.map((r, i) => <li key={i}>• {r}</li>)}
+                    {results.aiReport.professionalReport.recommendations.longTerm.map((r: string, i: number) => <li key={i}>• {r}</li>)}
                   </ul>
                </div>
             </div>
