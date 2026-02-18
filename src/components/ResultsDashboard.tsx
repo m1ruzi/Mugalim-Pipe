@@ -170,7 +170,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
       {/* Header — Минимализм */}
       <div className="text-center mb-8 md:mb-12">
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
-          <div className="w-12 h-12 md:w-14 md:h-14 bg-black rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-[#960018] rounded-2xl flex items-center justify-center shadow-lg">
             <Award className="w-6 h-6 md:w-7 md:h-7 text-white" />
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black">
@@ -194,7 +194,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
           
           {/* Score Circle — Черно-белый прогресс */}
           <div className="flex flex-col items-center order-2 lg:order-1">
-            <div className="relative w-32 h-32 md:w-48 md:h-48 flex items-center justify-center rounded-full bg-black shadow-2xl">
+            <div className="relative w-32 h-32 md:w-48 md:h-48 flex items-center justify-center rounded-full bg-[#960018] shadow-2xl">
               <div className="text-center z-10">
                 <span className="text-4xl md:text-6xl font-bold text-white tracking-tighter">{results.totalScore}</span>
                 <div className="text-white/40 text-[10px] md:text-[11px] font-bold uppercase tracking-widest mt-1">баллов</div>
@@ -233,7 +233,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                 <div className="space-y-2 md:space-y-3">
                   {(results.aiReport?.professionalReport?.detailedAnalysis?.strengths || results.strengths).map((strength: string, index: number) => (
                     <div key={index} className="flex items-start text-[14px] md:text-[15px] font-medium text-black/70">
-                      <div className="w-1.5 h-1.5 bg-black rounded-full mr-2 md:mr-3 mt-2 flex-shrink-0"></div>
+                      <div className="w-1.5 h-1.5 bg-[#960018] rounded-full mr-2 md:mr-3 mt-2 flex-shrink-0"></div>
                       <span>{strength}</span>
                     </div>
                   ))}
@@ -262,7 +262,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
         <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 md:mt-12 pt-8 md:pt-10 border-t border-black/5">
           <button 
             onClick={generatePDFReport}
-            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-black text-white font-bold rounded-full hover:bg-neutral-800 transition-all shadow-xl active:scale-95 text-sm md:text-base"
+            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-[#960018] text-white font-bold rounded-full hover:bg-[#7a0015] transition-all shadow-xl active:scale-95 text-sm md:text-base"
           >
             <Download className="w-4 h-4 md:w-5 md:h-5" />
             <span>Скачать AI-отчет</span>
@@ -314,7 +314,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
             <div key={index} className="bg-white rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-black/5 shadow-sm hover:shadow-md transition-all group">
               <div className="flex items-start justify-between mb-6 md:mb-8">
                 <div className="flex items-center space-x-3 md:space-x-5">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-black flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#960018] flex items-center justify-center shadow-lg">
                     <category.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                   </div>
                   <div>
@@ -331,7 +331,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
               <div className="mb-4 md:mb-6">
                 <div className="w-full bg-[#F5F5F7] rounded-full h-2 overflow-hidden">
                   <div 
-                    className="h-full bg-black transition-all duration-1000 ease-out"
+                    className="h-full bg-[#960018] transition-all duration-1000 ease-out"
                     style={{ width: `${(category.data.score / category.data.maxScore) * 100}%` }}
                   ></div>
                 </div>
@@ -363,7 +363,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
                       <span className="text-3xl font-black">{cat.data.score}<span className="text-sm text-black/20 font-normal ml-1">/ {cat.data.maxScore}</span></span>
                    </div>
                    <div className="h-1 w-full bg-[#F5F5F7] rounded-full overflow-hidden">
-                      <div className="h-full bg-black" style={{ width: `${(cat.data.score/cat.data.maxScore)*100}%` }}></div>
+                      <div className="h-full bg-[#960018]" style={{ width: `${(cat.data.score/cat.data.maxScore)*100}%` }}></div>
                    </div>
                 </div>
             ))}
@@ -371,7 +371,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
       )}
 
       {activeTab === 'ai-report' && results.aiReport && (
-        <div className="bg-black text-white rounded-[40px] p-12 mb-20 shadow-2xl">
+        <div className="bg-[#960018] text-white rounded-[40px] p-12 mb-20 shadow-2xl">
           <h3 className="text-4xl font-bold tracking-tight mb-8 flex items-center gap-4">
             <Sparkles className="w-10 h-10 opacity-50" />
             Профессиональный AI-отчет

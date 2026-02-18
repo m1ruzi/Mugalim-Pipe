@@ -76,11 +76,11 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
     <div className="max-w-4xl mx-auto px-4">
       {/* Hero Section */}
       <div className="text-center mb-16">
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight text-black mb-6">
+        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight text-white mb-6">
           Проанализируйте свой урок <br />
-          <span className="font-extralight text-black/40 tracking-tight">с помощью ИИ</span>
+          <span className="font-extralight text-white/80 tracking-tight">с помощью ИИ</span>
         </h1>
-        <p className="text-xl text-black/50 max-w-2xl mx-auto leading-relaxed font-light">
+        <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-light">
           Загрузите видео своего урока и получите детальный анализ позы, жестикуляции и речи с рекомендациями.
         </p>
       </div>
@@ -100,7 +100,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
             onDrop={handleDrop}
           >
             <div className="flex flex-col items-center space-y-6 md:space-y-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-black rounded-3xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-[#960018] rounded-3xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
                 <Upload className="w-8 h-8 md:w-10 md:h-10 text-white" />
               </div>
               
@@ -112,7 +112,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
                   Перетащите файл сюда или выберите на диске
                 </p>
                 
-                <label className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-black text-white font-medium rounded-full hover:bg-neutral-800 transition-all duration-300 cursor-pointer shadow-lg active:scale-95 text-sm md:text-base">
+                <label className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-[#960018] text-white font-medium rounded-full hover:bg-[#7a0015] transition-all duration-300 cursor-pointer shadow-lg active:scale-95 text-sm md:text-base">
                   <FileVideo className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                   Выбрать файл
                   <input
@@ -135,7 +135,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
             <div className="bg-[#F5F5F7] rounded-2xl md:rounded-3xl p-4 md:p-6 border border-black/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 md:space-x-5">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-black rounded-2xl flex items-center justify-center shadow-sm">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#960018] rounded-2xl flex items-center justify-center shadow-sm">
                     <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-white" />
                   </div>
                   <div>
@@ -157,7 +157,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
                 
                 <button
                   onClick={() => setUploadedFile(null)}
-                  className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-black/5 text-black/20 hover:text-black transition-all"
+                  className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-black/40 hover:text-black transition-all"
                 >
                   <X className="w-4 h-4 md:w-6 md:h-6" />
                 </button>
@@ -175,7 +175,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
                 { label: "Рекомендации", icon: Sparkles }
               ].map((feature, index) => (
                 <div key={index} className="flex items-center space-x-2 md:space-x-3 p-3 md:p-4 bg-[#F5F5F7]/50 rounded-xl md:rounded-2xl border border-black/[0.03] group hover:bg-white hover:shadow-sm transition-all duration-300">
-                  <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-black/[0.03] flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-300">
+                  <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-[#960018] group-hover:text-white transition-colors duration-300">
                     <feature.icon className="w-3 h-3 md:w-4 md:h-4 opacity-40 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <span className="text-xs md:text-sm font-medium text-black/70 tracking-tight leading-none">
@@ -188,7 +188,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
             {/* Analyze Button */}
             <button
               onClick={handleAnalyze}
-              className="w-full bg-black text-white py-4 md:py-5 px-4 md:px-6 rounded-xl md:rounded-2xl font-semibold text-base md:text-lg hover:bg-neutral-800 transition-all duration-300 shadow-xl flex items-center justify-center space-x-2 md:space-x-3 active:scale-[0.98]"
+              className="w-full bg-[#960018] text-white py-4 md:py-5 px-4 md:px-6 rounded-xl md:rounded-2xl font-semibold text-base md:text-lg hover:bg-[#7a0015] transition-all duration-300 shadow-xl flex items-center justify-center space-x-2 md:space-x-3 active:scale-[0.98]"
             >
               <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
               <span>Начать анализ урока</span>

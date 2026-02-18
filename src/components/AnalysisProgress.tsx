@@ -172,7 +172,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
       <div className="bg-[#F5F5F7] rounded-[20px] md:rounded-[24px] p-4 md:p-6 border border-black/[0.03] mb-6 md:mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center space-x-3 md:space-x-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-black rounded-2xl flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#960018] rounded-2xl flex items-center justify-center shadow-sm">
               <Wifi className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
@@ -194,9 +194,9 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
             <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-black/30">Общий прогресс</span>
             <span className="text-2xl md:text-3xl font-semibold tracking-tighter">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-[#F5F5F7] rounded-full h-2 md:h-3 overflow-hidden">
+            <div className="w-full bg-[#F5F5F7] rounded-full h-2 md:h-3 overflow-hidden">
             <div 
-              className="bg-black h-full transition-all duration-700 ease-in-out relative"
+              className="bg-[#960018] h-full transition-all duration-700 ease-in-out relative"
               style={{ width: `${progress}%` }}
             >
               <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
@@ -206,7 +206,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
 
         {/* Текущий этап */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-[#F5F5F7]/50 p-4 md:p-6 rounded-[20px] md:rounded-[24px] border border-black/[0.02]">
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-black flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-500">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-[#960018] flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-500">
             {CurrentStepIcon && <CurrentStepIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />}
           </div>
           <div>
@@ -236,9 +236,9 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
               </span>
             </div>
             <div className="text-[12px] font-bold uppercase tracking-tight text-black/30 mb-2">{item.label}</div>
-            <div className="w-full bg-[#F5F5F7] rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-[#F5F5F7] rounded-full h-1.5 overflow-hidden">
               <div 
-                className="bg-black h-full transition-all duration-500"
+                className="bg-[#960018] h-full transition-all duration-500"
                 style={{ width: `${detailedProgress[item.key as keyof typeof detailedProgress]}%` }}
               ></div>
             </div>
