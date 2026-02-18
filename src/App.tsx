@@ -56,10 +56,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFB] text-[#1D1D1F] antialiased">
+    <div className="min-h-screen bg-[#960018] text-white antialiased">
       
       {/* Header */}
-      <header className="bg-white/70 backdrop-blur-xl border-b border-black/5 sticky top-0 z-50">
+      <header className="bg-[#960018]/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -72,17 +72,17 @@ function App() {
               />
 
               <div>
-                <h1 className="text-xl font-bold tracking-tighter text-black leading-tight">
+                <h1 className="text-xl font-bold tracking-tighter text-white leading-tight">
                   {texts.appTitle}
                 </h1>
-                <p className="text-[10px] text-black/40 font-bold uppercase tracking-[0.2em] leading-none mt-1">
+                <p className="text-[10px] text-white/60 font-bold uppercase tracking-[0.2em] leading-none mt-1">
                   {texts.appSubtitle}
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-8">
-              <div className="hidden md:flex items-center space-x-6 text-[13px] font-medium text-black/60">
+              <div className="hidden md:flex items-center space-x-6 text-[13px] font-medium text-white/80">
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span>{texts.teachersCount}</span>
@@ -170,16 +170,16 @@ function App() {
       {/* Footer */}
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-black/5 text-center">
         <nav className="mb-4">
-          <a href="/pricing" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/pricing'); }}>
+          <a href="/pricing" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/pricing'); }}>
             Pricing
           </a>
-          <a href="/terms-of-service" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/terms-of-service'); }}>
+          <a href="/terms-of-service" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/terms-of-service'); }}>
             Terms
           </a>
-          <a href="/privacy-policy" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>
+          <a href="/privacy-policy" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>
             Privacy
           </a>
-          <a href="/refund-policy" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/refund-policy'); }}>
+          <a href="/refund-policy" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/refund-policy'); }}>
             Refund
           </a>
         </nav>

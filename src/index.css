@@ -6,5 +6,5 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  @apply bg-[#fbfbfb] text-[#1d1d1f] antialiased; /* Фирменный цвет фона и текста Apple */
+  @apply bg-[#960018] text-white antialiased; /* карминово-красный фон и белый текст */
 }
