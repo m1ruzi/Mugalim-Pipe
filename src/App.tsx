@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, BarChart3, Users, Target, TrendingUp, Brain } from 'lucide-react'; // Brain оставил для списка функций внизу
 import UploadSection from './components/UploadSection';
 import AnalysisProgress from './components/AnalysisProgress';
 import ResultsDashboard from './components/ResultsDashboard';
 import LanguageSelector from './components/LanguageSelector';
 import { languageService, type SupportedLanguage } from './services/LanguageService';
+
+// pages
+import Pricing from './pages/Pricing.tsx';
+import Termsandpolicies from './pages/Termsandpolicies.tsx';
+import TermsOfService from './pages/TermsOfService.tsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.tsx';
+import RefundPolicy from './pages/RefundPolicy.tsx';
 
 function App() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'analyzing' | 'results'>('upload');
@@ -34,6 +41,19 @@ function App() {
   };
 
   const texts = languageService.getText();
+
+  // simple client-side routing based on pathname
+  const [route, setRoute] = useState(window.location.pathname);
+  useEffect(() => {
+    const handler = () => setRoute(window.location.pathname);
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, '', path);
+    setRoute(path);
+  };
 
   return (
     <div className="min-h-screen bg-[#FBFBFB] text-[#1D1D1F] antialiased">
@@ -86,23 +106,29 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="transition-all duration-700 ease-in-out">
-          {currentStep === 'upload' && (
-            <UploadSection onFileUpload={handleFileUpload} />
-          )}
-          
-          {currentStep === 'analyzing' && uploadedFile && (
-            <AnalysisProgress 
-              fileName={uploadedFile.name} 
-              onAnalysisComplete={handleAnalysisComplete}
-              videoFile={uploadedFile}
-            />
-          )}
-          
-          {currentStep === 'results' && analysisResults && (
-            <ResultsDashboard results={analysisResults} onReset={resetApp} />
-          )}
-        </div>
+        {route === '/' && (
+          <div className="transition-all duration-700 ease-in-out">
+            {currentStep === 'upload' && (
+              <UploadSection onFileUpload={handleFileUpload} />
+            )}
+            {currentStep === 'analyzing' && uploadedFile && (
+              <AnalysisProgress 
+                fileName={uploadedFile.name} 
+                onAnalysisComplete={handleAnalysisComplete}
+                videoFile={uploadedFile}
+              />
+            )}
+            {currentStep === 'results' && analysisResults && (
+              <ResultsDashboard results={analysisResults} onReset={resetApp} />
+            )}
+          </div>
+        )}
+
+        {route === '/pricing' && <Pricing />}
+        {route === '/terms-and-policies' && <Termsandpolicies />}
+        {route === '/terms-of-service' && <TermsOfService />}
+        {route === '/privacy-policy' && <PrivacyPolicy />}
+        {route === '/refund-policy' && <RefundPolicy />}
       </main>
 
       {/* Features Section */}
@@ -143,6 +169,20 @@ function App() {
 
       {/* Footer */}
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-black/5 text-center">
+        <nav className="mb-4">
+          <a href="/pricing" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/pricing'); }}>
+            Pricing
+          </a>
+          <a href="/terms-of-service" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/terms-of-service'); }}>
+            Terms
+          </a>
+          <a href="/privacy-policy" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>
+            Privacy
+          </a>
+          <a href="/refund-policy" className="text-sm text-blue-600 underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/refund-policy'); }}>
+            Refund
+          </a>
+        </nav>
         <p className="text-[13px] text-black/30 font-medium tracking-tight">
           © 2026 {texts.appTitle}. Built for excellence.
         </p>
