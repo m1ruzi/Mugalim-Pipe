@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Brain, Eye, Users, MessageSquare, BarChart3, Zap, Mic, FileText, CheckCircle, Wifi, Globe, Languages, Loader2 } from 'lucide-react';
+import { Brain, Eye, Users, MessageSquare, BarChart3, Mic, FileText, CheckCircle, Wifi, Languages, Loader2 } from 'lucide-react';
 
 interface AnalysisProgressProps {
   fileName: string;
@@ -10,7 +10,6 @@ interface AnalysisProgressProps {
 const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysisComplete, videoFile }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [detailedProgress, setDetailedProgress] = useState({
     initialization: 0,
     videoAnalysis: 0,
@@ -137,8 +136,6 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
           }
         };
         
-        setAnalysisResults(finalResults);
-        
         setTimeout(() => {
           onAnalysisComplete(finalResults);
         }, 1500);
@@ -155,48 +152,73 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
   const CurrentStepIcon = analysisSteps[currentStep]?.icon;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
-      {/* Header — Чистая типографика Apple */}
-      <div className="text-center mb-8 md:mb-12">
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-black mb-3">
-          Выполняется AI-анализ
+    <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 space-y-8 md:space-y-12">
+      {/* Header */}
+      <div className="space-y-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-600 tracking-tight text-gray-900">
+          Анализ видео
         </h1>
-        <p className="text-base md:text-lg text-black/40 font-light mb-1 px-4">{fileName}</p>
-        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-black/5 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-black/50">
-          <Loader2 className="w-3 h-3 animate-spin" />
-          <span>Обработка Google Gemini AI</span>
+        <p className="text-sm sm:text-base text-gray-500 font-400">
+          <span className="font-600 text-gray-900">{fileName}</span> • обработка в процессе...
+        </p>
+      </div>
+
+      {/* Main Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs md:text-sm font-600 text-gray-600 uppercase tracking-wide">Общий прогресс</span>
+          <span className="text-xs md:text-sm font-600 text-gray-900">{Math.round(progress)}%</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-gradient-to-r from-carmine-600 to-carmine-500 h-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          >
+            <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+          </div>
         </div>
       </div>
 
-      {/* Индикаторы безопасности (ч/б стиль) */}
-      <div className="bg-[#F5F5F7] rounded-[20px] md:rounded-[24px] p-4 md:p-6 border border-black/[0.03] mb-6 md:mb-8">
+      {/* Status Badge */}
+      <div className="flex items-center space-x-3 p-3 md:p-4 bg-carmine-50 rounded-xl md:rounded-2xl border border-carmine-100">
+        <div className="w-8 h-8 md:w-10 md:h-10 bg-carmine-600 rounded-lg md:rounded-xl flex items-center justify-center">
+          <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-white animate-spin" />
+        </div>
+        <div>
+          <h3 className="text-sm md:text-base font-600 text-gray-900">Выполняется анализ</h3>
+          <p className="text-xs md:text-sm text-gray-500 font-400">Google Gemini AI обрабатывает видео</p>
+        </div>
+      </div>
+
+      {/* Security Indicator */}
+      <div className="bg-apple-gray-100 rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-200 mb-6 md:mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center space-x-3 md:space-x-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-[#960018] rounded-2xl flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-carmine-600 rounded-xl flex items-center justify-center shadow-sm">
               <Wifi className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-[14px] md:text-[15px] font-semibold text-black leading-tight">Secure API Integration</h3>
-              <p className="text-[12px] md:text-[13px] text-black/40">Yandex SpeechKit v3 + Gemini Cloud</p>
+              <h3 className="text-sm md:text-base font-600 text-gray-900">Безопасное соединение</h3>
+              <p className="text-xs md:text-sm text-gray-500 font-400">Yandex SpeechKit v3 + Gemini Cloud</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 text-black/60 bg-white px-3 md:px-4 py-2 rounded-xl border border-black/5 shadow-sm text-xs md:text-sm font-medium">
-            <CheckCircle className="w-3 h-3 md:w-4 md:h-4" />
+          <div className="flex items-center space-x-2 text-gray-600 bg-apple-gray-50 px-3 md:px-4 py-2 rounded-lg border border-apple-gray-200 shadow-sm text-xs md:text-sm font-600">
+            <CheckCircle className="w-4 h-4" />
             <span>Шифрование активно</span>
           </div>
         </div>
       </div>
 
       {/* Main Progress Bar — Жирный черный стиль */}
-      <div className="bg-white rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-black/5 shadow-sm mb-6 md:mb-8">
+      <div className="bg-apple-gray-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-apple-gray-200 shadow-sm mb-6 md:mb-8">
         <div className="mb-8 md:mb-10">
           <div className="flex justify-between items-end mb-3 md:mb-4 px-1">
-            <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-black/30">Общий прогресс</span>
+            <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-gray-500">Общий прогресс</span>
             <span className="text-2xl md:text-3xl font-semibold tracking-tighter">{Math.round(progress)}%</span>
           </div>
             <div className="w-full bg-[#F5F5F7] rounded-full h-2 md:h-3 overflow-hidden">
             <div 
-              className="bg-[#960018] h-full transition-all duration-700 ease-in-out relative"
+              className="bg-carmine-700 h-full transition-all duration-700 ease-in-out relative"
               style={{ width: `${progress}%` }}
             >
               <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
@@ -205,22 +227,22 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
         </div>
 
         {/* Текущий этап */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-[#F5F5F7]/50 p-4 md:p-6 rounded-[20px] md:rounded-[24px] border border-black/[0.02]">
-          <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-[#960018] flex items-center justify-center shadow-lg animate-in fade-in zoom-in duration-500">
-            {CurrentStepIcon && <CurrentStepIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-carmine-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-carmine-100">
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-carmine-600 flex items-center justify-center shadow-md animate-in fade-in zoom-in duration-500">
+            {CurrentStepIcon && <CurrentStepIcon className="w-6 h-6 md:w-7 md:h-7 text-white" />}
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-black tracking-tight leading-none mb-2">
+            <h3 className="text-base md:text-lg font-600 text-gray-900 tracking-tight leading-none mb-1">
               {analysisSteps[currentStep]?.title}
             </h3>
-            <p className="text-black/40 font-light tracking-tight italic">
+            <p className="text-sm text-gray-500 font-400 tracking-tight">
               {analysisSteps[currentStep]?.description}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Detailed Progress Grid — Чистые карточки без градиентов */}
+      {/* Detailed Progress Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {[
           { key: 'initialization', label: 'Инициализация', icon: Brain },
@@ -228,17 +250,17 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
           { key: 'audioAnalysis', label: 'Речь и AI', icon: Languages },
           { key: 'scoring', label: 'Финальный счет', icon: BarChart3 }
         ].map((item) => (
-          <div key={item.key} className="bg-white rounded-2xl p-5 border border-black/5 shadow-sm">
+          <div key={item.key} className="bg-apple-gray-50 rounded-2xl p-4 border border-apple-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <item.icon className="w-4 h-4 text-black/20" />
-              <span className="text-sm font-bold tracking-tighter">
+              <item.icon className="w-4 h-4 text-gray-300" />
+              <span className="text-sm font-600 tracking-tight">
                 {Math.round(detailedProgress[item.key as keyof typeof detailedProgress])}%
               </span>
             </div>
-            <div className="text-[12px] font-bold uppercase tracking-tight text-black/30 mb-2">{item.label}</div>
-              <div className="w-full bg-[#F5F5F7] rounded-full h-1.5 overflow-hidden">
+            <div className="text-xs font-600 uppercase tracking-wider text-gray-400 mb-2">{item.label}</div>
+              <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
               <div 
-                className="bg-[#960018] h-full transition-all duration-500"
+                className="bg-carmine-600 h-full transition-all duration-500"
                 style={{ width: `${detailedProgress[item.key as keyof typeof detailedProgress]}%` }}
               ></div>
             </div>
@@ -246,42 +268,42 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
         ))}
       </div>
 
-      {/* Quality Metrics — Серый Apple-блок */}
-      <div className="bg-[#F5F5F7] rounded-[32px] p-8 border border-black/5 mb-8">
-        <div className="flex items-center space-x-2 mb-6 opacity-40">
-          <BarChart3 className="w-5 h-5 text-black" />
-          <h3 className="text-xs font-bold uppercase tracking-widest">Качество обработки</h3>
+      {/* Quality Metrics */}
+      <div className="bg-apple-gray-100 rounded-3xl p-6 md:p-8 border border-gray-200 mb-8">
+        <div className="flex items-center space-x-2 mb-4 opacity-60">
+          <BarChart3 className="w-4 h-4 text-gray-600" />
+          <h3 className="text-xs font-600 uppercase tracking-wider text-gray-600">Качество обработки</h3>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {[
             { label: 'Видео сигнал', value: qualityMetrics.videoQuality, icon: Eye },
             { label: 'Аудио (filler words)', value: qualityMetrics.audioQuality, icon: Languages },
             { label: 'AI Точность', value: qualityMetrics.analysisQuality, icon: Brain }
           ].map((metric, index) => (
             <div key={index} className="space-y-1">
-              <div className="text-[13px] font-semibold text-black/40">{metric.label}</div>
-              <div className="text-[15px] font-bold tracking-tight">{metric.value}</div>
+              <div className="text-xs font-600 text-gray-500 uppercase tracking-wider">{metric.label}</div>
+              <div className="text-sm md:text-base font-600 text-gray-900">{metric.value}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Technical Info — Строгий футер секции */}
-      <div className="grid md:grid-cols-4 gap-6 text-[11px] text-black/30 font-medium leading-relaxed border-t border-black/5 pt-8">
+      {/* Technical Info */}
+      <div className="grid md:grid-cols-4 gap-6 text-xs text-gray-500 font-400 leading-relaxed border-t border-gray-200 pt-8">
         <div>
-          <span className="text-black/60 block mb-1 uppercase tracking-widest">MediaPipe Vision</span>
+          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">MediaPipe Vision</span>
           33 точки позы, 468 точек лица
         </div>
         <div>
-          <span className="text-black/60 block mb-1 uppercase tracking-widest">Speech Analysis</span>
+          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Speech Analysis</span>
           Yandex SpeechKit v3 Cloud
         </div>
         <div>
-          <span className="text-black/60 block mb-1 uppercase tracking-widest">Logic Engine</span>
+          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Logic Engine</span>
           Google Gemini 1.5 Pro
         </div>
         <div>
-          <span className="text-black/60 block mb-1 uppercase tracking-widest">Security</span>
+          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Security</span>
           Netlify Functions • AES-256
         </div>
       </div>

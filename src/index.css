@@ -1,38 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root{
-  --accent: #960018; /* карминово-красный */
-  --bg: #ffffff;
-  --muted: #6b7280;
-  --card-border: rgba(15,23,42,0.04);
+  /* burgundy accents */
+  --accent: #800020;
+  --accent-dark: #600018;
+  /* Apple-like neutral palette */
+  --bg: #F5F5F7;
+  --bg-secondary: #FFFFFF;
+  --border: rgba(0,0,0,0.1);
+  --text-primary: #1D1D1F;
+  --text-secondary: #6E6E73;
+  --text-tertiary: #8E8E93;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1C1C1E;
+    --bg-secondary: #2C2C2E;
+    --border: rgba(255,255,255,0.1);
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1A6;
+    --text-tertiary: #848489;
+  }
+}
+
+* {
+  @apply transition-colors duration-200;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--accent);
-  color: white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'San Francisco', 'SF Pro Display', 'Segoe UI', sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02' 1;
 }
 
-/* Utility: card style used across components */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold;
+}
+
+p {
+  @apply font-medium;
+}
+
+button {
+  @apply font-semibold;
+}
+
+/* Apple-style card */
 .site-card {
   background-color: var(--bg);
-  color: #0f172a;
-  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.site-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.1);
 }
 
 /* Accent button */
-.btn-accent{
+.btn-accent {
   background-color: var(--accent);
   color: white;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-dark);
+  /* match burgundy shade with transparency */
+  box-shadow: 0 8px 20px rgba(128, 0, 32, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-accent:active {
+  transform: scale(0.98);
 }
 
 /* Muted text */
-.text-muted{ color: var(--muted); }
+.text-muted { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }

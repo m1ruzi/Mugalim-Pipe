@@ -4,6 +4,10 @@ import UploadSection from './components/UploadSection';
 import AnalysisProgress from './components/AnalysisProgress';
 import ResultsDashboard from './components/ResultsDashboard';
 import LanguageSelector from './components/LanguageSelector';
+import Auth from './components/Auth';
+import Landing from './components/Landing';
+import Profile from './components/Profile';
+import { supabase } from './supabase';
 import { languageService, type SupportedLanguage } from './services/LanguageService';
 
 // pages
@@ -18,6 +22,9 @@ function App() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisResults, setAnalysisResults] = useState(null);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ru');
+
+  // auth session state
+  const [session, setSession] = useState<any>(null);
 
   const handleLanguageChange = (language: SupportedLanguage) => {
     setCurrentLanguage(language);
@@ -50,39 +57,52 @@ function App() {
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
+  // check auth session & listen for changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
     setRoute(path);
   };
 
   return (
-    <div className="min-h-screen bg-[#960018] text-white antialiased">
+    <div className="min-h-screen bg-apple-gray-50 text-gray-900 antialiased">
       
       {/* Header */}
-      <header className="bg-[#960018]/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-apple-gray-50/80 backdrop-blur-2xl border-b border-apple-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              
-              {/* ЗАМЕНА: Твой логотип из папки public */}
-              <img 
-                src="/logo-book.png" 
-                alt="Logo" 
-                className="w-10 h-10 object-contain rounded-lg shadow-sm"
-              />
-
-              <div>
-                <h1 className="text-xl font-bold tracking-tighter text-white leading-tight">
-                  {texts.appTitle}
-                </h1>
-                <p className="text-[10px] text-white/60 font-bold uppercase tracking-[0.2em] leading-none mt-1">
-                  {texts.appSubtitle}
-                </p>
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {/* glassy tab for logo + name */}
+              <div className="flex items-center space-x-3 bg-white/40 backdrop-blur-lg rounded-2xl px-3 py-1">
+                <img 
+                  src="/logo-book.png" 
+                  alt="Logo" 
+                  className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-lg"
+                />
+                <div>
+                  <h1 className="text-base sm:text-lg font-600 tracking-tight leading-tight bg-white/30 backdrop-blur-sm rounded-md px-1">
+                    {texts.appTitle}
+                  </h1>
+                  <p className="text-[10px] sm:text-[11px] text-gray-500 font-500 uppercase tracking-[0.15em] leading-none mt-0.5">
+                    {texts.appSubtitle}
+                  </p>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-8">
-              <div className="hidden md:flex items-center space-x-6 text-[13px] font-medium text-white/80">
+            <div className="flex items-center space-x-6 sm:space-x-8">
+              <div className="hidden md:flex items-center space-x-6 text-[13px] font-500 text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span>{texts.teachersCount}</span>
@@ -93,7 +113,32 @@ function App() {
                 </div>
               </div>
               
-              <div className="pl-6 border-l border-black/10">
+              {/* Auth Button or Profile */}
+              {!session ? (
+                <button
+                  onClick={() => navigate('/auth')}
+                  className="px-4 py-2 bg-carmine-600 text-white rounded-lg font-500 text-sm hover:bg-carmine-700 transition-colors duration-200"
+                >
+                  Войти
+                </button>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-500 text-sm hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    👤 Профиль
+                  </button>
+                  <button
+                    onClick={() => supabase.auth.signOut()}
+                    className="px-4 py-2 bg-carmine-600 text-white rounded-lg font-500 text-sm hover:bg-carmine-700 transition-colors duration-200"
+                  >
+                    Выход
+                  </button>
+                </div>
+              )}
+              
+              <div className="pl-4 sm:pl-6 border-l border-gray-200">
                 <LanguageSelector 
                   currentLanguage={currentLanguage}
                   onLanguageChange={handleLanguageChange}
@@ -105,45 +150,65 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {route === '/' && (
-          <div className="transition-all duration-700 ease-in-out">
-            {currentStep === 'upload' && (
-              <UploadSection onFileUpload={handleFileUpload} />
-            )}
-            {currentStep === 'analyzing' && uploadedFile && (
-              <AnalysisProgress 
-                fileName={uploadedFile.name} 
-                onAnalysisComplete={handleAnalysisComplete}
-                videoFile={uploadedFile}
-              />
-            )}
-            {currentStep === 'results' && analysisResults && (
-              <ResultsDashboard results={analysisResults} onReset={resetApp} />
-            )}
-          </div>
-        )}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        {!session ? (
+          // If not logged in
+          route === '/auth' ? (
+            <Auth />
+          ) : (
+            <Landing onLoginClick={() => navigate('/auth')} />
+          )
+        ) : (
+          // If logged in
+          route === '/profile' ? (
+            <Profile session={session} />
+          ) : (
+            // Upload interface
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-700 text-gray-900">Загрузи видео для анализа</h1>
+                  <p className="text-gray-600 mt-2">Получи детальный анализ своих педагогических навыков</p>
+                </div>
+                <button
+                  onClick={() => supabase.auth.signOut()}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-500 text-sm hover:bg-gray-300 transition-colors"
+                >
+                  Выход
+                </button>
+              </div>
 
-        {route === '/pricing' && <Pricing />}
-        {route === '/terms-and-policies' && <Termsandpolicies />}
-        {route === '/terms-of-service' && <TermsOfService />}
-        {route === '/privacy-policy' && <PrivacyPolicy />}
-        {route === '/refund-policy' && <RefundPolicy />}
+              {currentStep === 'upload' && <UploadSection onFileSelect={handleFileUpload} />}
+              {currentStep === 'analyzing' && uploadedFile && <AnalysisProgress file={uploadedFile} onComplete={handleAnalysisComplete} />}
+              {currentStep === 'results' && analysisResults && (
+                <>
+                  <ResultsDashboard results={analysisResults} />
+                  <button
+                    onClick={resetApp}
+                    className="mt-8 px-6 py-3 bg-carmine-600 text-white rounded-lg font-600 hover:bg-carmine-700 transition-colors"
+                  >
+                    Анализировать ещё видео
+                  </button>
+                </>
+              )}
+            </div>
+          )
+        )}
       </main>
 
       {/* Features Section */}
       {currentStep === 'upload' && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-black/5">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-black mb-4">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 border-t border-gray-200">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-600 tracking-tight mb-3 sm:mb-4">
               {texts.featuresTitle}
             </h2>
-            <p className="text-xl text-black/40 font-light max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-500 font-400 max-w-2xl mx-auto">
               {texts.featuresSubtitle}
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {[
               { icon: Target, title: texts.features.poseAnalysis.title, description: texts.features.poseAnalysis.description },
               { icon: Users, title: texts.features.gestureRecognition.title, description: texts.features.gestureRecognition.description },
@@ -154,13 +219,13 @@ function App() {
             ].map((feature, index) => (
               <div 
                 key={index} 
-                className="bg-white rounded-[24px] p-8 border border-black/[0.03] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] transition-all duration-500 hover:-translate-y-1 cursor-default group"
+                className="rounded-2xl p-6 sm:p-8 border border-apple-gray-200 bg-apple-gray-50 hover:bg-apple-gray-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-default group"
               >
-                <div className="w-12 h-12 bg-[#F5F5F7] rounded-2xl flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-colors duration-500">
-                  <feature.icon className="w-6 h-6 transition-colors" />
+                <div className="w-10 h-10 bg-carmine-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-carmine-500 group-hover:text-white transition-all duration-300">
+                  <feature.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-semibold text-black mb-3 tracking-tight">{feature.title}</h3>
-                <p className="text-[15px] leading-relaxed text-black/50 font-light">{feature.description}</p>
+                <h3 className="text-base sm:text-lg font-600 text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-sm sm:text-base leading-relaxed text-gray-500 font-400">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -168,22 +233,22 @@ function App() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-black/5 text-center">
-        <nav className="mb-4">
-          <a href="/pricing" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/pricing'); }}>
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-gray-200 text-center">
+        <nav className="mb-4 space-x-4 sm:space-x-6 flex justify-center flex-wrap">
+          <a href="/pricing" className="text-sm text-carmine-600 hover:text-carmine-700" onClick={(e) => { e.preventDefault(); navigate('/pricing'); }}>
             Pricing
           </a>
-          <a href="/terms-of-service" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/terms-of-service'); }}>
+          <a href="/terms-of-service" className="text-sm text-carmine-600 hover:text-carmine-700" onClick={(e) => { e.preventDefault(); navigate('/terms-of-service'); }}>
             Terms
           </a>
-          <a href="/privacy-policy" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>
+          <a href="/privacy-policy" className="text-sm text-carmine-600 hover:text-carmine-700" onClick={(e) => { e.preventDefault(); navigate('/privacy-policy'); }}>
             Privacy
           </a>
-          <a href="/refund-policy" className="text-sm text-white underline mx-2" onClick={(e) => { e.preventDefault(); navigate('/refund-policy'); }}>
+          <a href="/refund-policy" className="text-sm text-carmine-600 hover:text-carmine-700" onClick={(e) => { e.preventDefault(); navigate('/refund-policy'); }}>
             Refund
           </a>
         </nav>
-        <p className="text-[13px] text-black/30 font-medium tracking-tight">
+        <p className="text-xs sm:text-sm text-gray-400 font-400 tracking-tight">
           © 2026 {texts.appTitle}. Built for excellence.
         </p>
       </footer>
