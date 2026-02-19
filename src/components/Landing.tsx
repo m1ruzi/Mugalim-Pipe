@@ -1,12 +1,23 @@
+import SilkSimple from './SilkSimple';
+
 interface LandingProps {
   onLoginClick: () => void;
 }
 
 export default function Landing({ onLoginClick }: LandingProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-apple-gray-50 to-white flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-apple-gray-50 to-white flex flex-col items-center justify-center px-4 relative overflow-hidden">
+      {/* Silk Background */}
+      <SilkSimple
+        speed={3}
+        scale={1.5}
+        color="#682c2c"
+        noiseIntensity={1.2}
+        rotation={0}
+      />
+      
       {/* Main Content */}
-      <div className="text-center max-w-3xl mx-auto">
+      <div className="text-center max-w-3xl mx-auto relative z-10">
         {/* Logo */}
         <div className="mb-8 flex justify-center">
           <img 

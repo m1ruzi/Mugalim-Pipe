@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 
 interface UploadSectionProps {
-  onFileUpload: (file: File) => void;
+  onFileSelect: (file: File) => void;
 }
 
-const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
+const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
@@ -56,7 +56,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
 
   const handleAnalyze = () => {
     if (uploadedFile) {
-      onFileUpload(uploadedFile);
+      onFileSelect(uploadedFile);
     }
   };
 

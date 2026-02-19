@@ -7,6 +7,7 @@ import LanguageSelector from './components/LanguageSelector';
 import Auth from './components/Auth';
 import Landing from './components/Landing';
 import Profile from './components/Profile';
+import SilkSimple from './components/SilkSimple';
 import { supabase } from './supabase';
 import { languageService, type SupportedLanguage } from './services/LanguageService';
 
@@ -47,6 +48,58 @@ function App() {
     setAnalysisResults(null);
   };
 
+  const handleSaveReport = async (pdfBlob: Blob, fileName: string) => {
+    if (!session?.user) {
+      alert('Пожалуйста, войдите в систему для сохранения отчета');
+      return;
+    }
+
+    try {
+      // Загружаем PDF файл в Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('reports')
+        .upload(`${session.user.id}/${fileName}`, pdfBlob, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Error uploading PDF:', uploadError);
+        throw uploadError;
+      }
+
+      // Получаем публичную ссылку на файл
+      const { data: { publicUrl } } = supabase.storage
+        .from('reports')
+        .getPublicUrl(`${session.user.id}/${fileName}`);
+
+      // Сохраняем запись в таблице reports
+      const { error: dbError } = await supabase
+        .from('reports')
+        .insert({
+          user_id: session.user.id,
+          title: `Анализ урока от ${new Date().toLocaleDateString('ru-RU')}`,
+          file_name: fileName,
+          file_url: publicUrl,
+          storage_path: `${session.user.id}/${fileName}`,
+          total_score: analysisResults?.totalScore || 0,
+          percentage: analysisResults?.percentage || 0,
+          grade: analysisResults?.grade || 'N/A',
+          content: analysisResults
+        });
+
+      if (dbError) {
+        console.error('Error saving report to database:', dbError);
+        throw dbError;
+      }
+
+      alert('✅ Отчет успешно сохранен в профиль!');
+    } catch (error) {
+      console.error('Error saving report:', error);
+      alert('❌ Ошибка при сохранении отчета: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+    }
+  };
+
   const texts = languageService.getText();
 
   // simple client-side routing based on pathname
@@ -76,8 +129,20 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-apple-gray-50 text-gray-900 antialiased">
-      
+    <div className="min-h-screen bg-apple-gray-50 text-gray-900 antialiased relative">
+      {/* Silk Background - только для страницы загрузки */}
+      {!session && route !== '/auth' && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.15 }}>
+          <SilkSimple
+            speed={2}
+            scale={1.5}
+            color="#682c2c"
+            noiseIntensity={0.8}
+            rotation={0}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-apple-gray-50/80 backdrop-blur-2xl border-b border-apple-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
@@ -182,7 +247,11 @@ function App() {
               {currentStep === 'analyzing' && uploadedFile && <AnalysisProgress file={uploadedFile} onComplete={handleAnalysisComplete} />}
               {currentStep === 'results' && analysisResults && (
                 <>
-                  <ResultsDashboard results={analysisResults} />
+                  <ResultsDashboard 
+                    results={analysisResults} 
+                    onReset={resetApp}
+                    onSaveReport={handleSaveReport}
+                  />
                   <button
                     onClick={resetApp}
                     className="mt-8 px-6 py-3 bg-carmine-600 text-white rounded-lg font-600 hover:bg-carmine-700 transition-colors"

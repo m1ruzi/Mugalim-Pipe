@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../supabase';
+import SilkSimple from './SilkSimple';
 
 export default function Auth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -12,14 +13,15 @@ export default function Auth() {
   const handleAuth = async (nicknameValue: string, passwordValue: string) => {
     setError(null);
     setSuccess(null);
-    
+
     if (!nicknameValue || !passwordValue) {
       setError('Пожалуйста, укажите никнейм и пароль.');
       return;
     }
 
     setLoading(true);
-    const fakeEmail = `${nicknameValue.toLowerCase()}@app.local`;
+    // Используем валидный формат email для Supabase
+    const fakeEmail = `${nicknameValue.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`;
 
     try {
       // Пробуем войти
@@ -75,7 +77,18 @@ export default function Auth() {
   };
 
   return (
-    <div style={{ maxWidth: '450px', margin: '30px auto', padding: '0' }}>
+    <div style={{ maxWidth: '450px', margin: '30px auto', padding: '0', position: 'relative', zIndex: 10 }}>
+      {/* Silk Background */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <SilkSimple
+          speed={2}
+          scale={1.2}
+          color="#682c2c"
+          noiseIntensity={1.0}
+          rotation={0}
+        />
+      </div>
+      
       {/* Вкладки */}
       <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '20px' }}>
         <button

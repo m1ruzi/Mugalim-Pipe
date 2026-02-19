@@ -3,22 +3,27 @@ import { BarChart3, TrendingUp, Star, Download, Share2, RotateCcw, Target, Users
 import { ComprehensiveAnalysis } from '../services/ScoringService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { supabase } from '../supabase';
+import SilkSimple from './SilkSimple';
 
 interface ResultsDashboardProps {
   results: ComprehensiveAnalysis;
   onReset: () => void;
+  onSaveReport?: (pdfBlob: Blob, fileName: string) => Promise<void>;
 }
 
-const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset }) => {
+const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, onSaveReport }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'recommendations' | 'ai-report' | 'analytics'>('overview');
+  const [saving, setSaving] = useState(false);
 
-  const generatePDFReport = async () => {
+  const generatePDFReport = async (saveToDb: boolean = false) => {
     if (!results.aiReport) {
       alert('AI-отчет недоступен для скачивания');
       return;
     }
 
     try {
+      setSaving(true);
       console.log('Начинаем генерацию PDF...');
 
       // Создаем временный HTML элемент с отчетом
@@ -56,7 +61,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
         <div style="margin-bottom: 30px;">
           <h2 style="font-size: 18px; margin-bottom: 10px;">Рекомендации:</h2>
-          
+
           <h3 style="font-size: 16px; margin-bottom: 5px;">Немедленные действия:</h3>
           <ul style="line-height: 1.6; margin-bottom: 15px;">
             ${results.aiReport.professionalReport.recommendations.immediate.map((r: string) => `<li>${r}</li>`).join('')}
@@ -75,7 +80,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
         <div style="margin-bottom: 30px;">
           <h2 style="font-size: 18px; margin-bottom: 10px;">План действий:</h2>
-          
+
           <h3 style="font-size: 16px; margin-bottom: 5px;">Неделя 1:</h3>
           <ul style="line-height: 1.6; margin-bottom: 10px;">
             ${results.aiReport.professionalReport.actionPlan.week1.map((a: string) => `<li>${a}</li>`).join('')}
@@ -122,7 +127,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
       console.log('Создаем PDF...');
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      
+
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 295; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -142,9 +147,28 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
         heightLeft -= pageHeight;
       }
 
+      // Получаем PDF как Blob
+      const pdfBlob = await new Promise<Blob>((resolve) => {
+        pdf.getBlob((blob: Blob) => resolve(blob));
+      });
+
+      const fileName = `AI-отчет-${new Date().toISOString().split('T')[0]}.pdf`;
+
+      // Если нужно сохранить в базу
+      if (saveToDb && onSaveReport) {
+        console.log('Сохраняем отчет в базу данных...');
+        await onSaveReport(pdfBlob, fileName);
+      }
+
       // Скачиваем PDF
       console.log('Скачиваем PDF...');
-      pdf.save(`AI-отчет-анализа-${new Date().toISOString().split('T')[0]}.pdf`);
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
+
       console.log('PDF успешно создан и скачан');
 
     } catch (error) {
@@ -153,6 +177,8 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
       const errorStack = error instanceof Error ? error.stack : '';
       console.error('Детали ошибки:', errorMessage, errorStack);
       alert(`Ошибка при генерации PDF отчета: ${errorMessage}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -166,7 +192,18 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-4 md:py-8">
+    <div className="max-w-6xl mx-auto px-4 py-4 md:py-8 relative">
+      {/* Silk Background */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.2 }}>
+        <SilkSimple
+          speed={3}
+          scale={1.5}
+          color="#682c2c"
+          noiseIntensity={1.0}
+          rotation={0}
+        />
+      </div>
+      
       {/* Header */}
       <div className="text-center mb-8 md:mb-12">
         <div className="mb-4">
@@ -260,18 +297,27 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset })
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 md:mt-12 pt-8 md:pt-10 border-t border-gray-200">
-          <button 
-            onClick={generatePDFReport}
-            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-carmine-600 text-white font-600 rounded-full hover:bg-carmine-700 transition-all shadow-md hover:shadow-lg active:scale-95 text-sm md:text-base"
+          <button
+            onClick={() => generatePDFReport(false)}
+            disabled={saving}
+            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-carmine-600 text-white font-600 rounded-full hover:bg-carmine-700 transition-all shadow-md hover:shadow-lg active:scale-95 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4 md:w-5 md:h-5" />
-            <span>Скачать отчет</span>
+            <span>{saving ? 'Генерация...' : 'Скачать отчет'}</span>
+          </button>
+          <button
+            onClick={() => generatePDFReport(true)}
+            disabled={saving}
+            className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-blue-600 text-white font-600 rounded-full hover:bg-blue-700 transition-all shadow-md hover:shadow-lg active:scale-95 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4 md:w-5 md:h-5" />
+            <span>{saving ? 'Сохранение...' : 'Сохранить в профиль'}</span>
           </button>
           <button className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-gray-100 text-gray-900 font-600 rounded-full hover:bg-gray-200 transition-all text-sm md:text-base">
             <Share2 className="w-4 h-4 md:w-5 md:h-5 opacity-60" />
             <span>Поделиться</span>
           </button>
-          <button 
+          <button
             onClick={onReset}
             className="flex items-center space-x-2 px-6 md:px-8 py-3 md:py-4 bg-apple-gray-50 border border-apple-gray-200 text-gray-900 font-600 rounded-full hover:bg-apple-gray-100 transition-all text-sm md:text-base"
           >

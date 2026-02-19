@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Brain, Eye, Users, MessageSquare, BarChart3, Mic, FileText, CheckCircle, Wifi, Languages, Loader2 } from 'lucide-react';
 
 interface AnalysisProgressProps {
-  fileName: string;
-  onAnalysisComplete: (results: any) => void;
-  videoFile: File;
+  file: File;
+  onComplete: (results: any) => void;
 }
 
-const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysisComplete, videoFile }) => {
+const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [detailedProgress, setDetailedProgress] = useState({
@@ -22,8 +21,8 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
     analysisQuality: 'Ожидание...'
   });
 
-  const hasYandexCredentials = true; 
-  
+  const hasYandexCredentials = true;
+
   const [yandexConfig] = useState({
     enabled: hasYandexCredentials,
     languages: ['ru-RU', 'kk-KZ', 'en-US'],
@@ -31,6 +30,10 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
     includeFillerWords: true,
     connectionStatus: 'not_tested' as 'not_tested' | 'testing' | 'success' | 'failed'
   });
+
+  const videoFile = file;
+  const fileName = file.name;
+  const onAnalysisComplete = onComplete;
 
   // Изменено: Цвета заменены на системные ч/б
   const analysisSteps = [
@@ -147,7 +150,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ fileName, onAnalysi
     };
 
     runComprehensiveAnalysis();
-  }, [videoFile, onAnalysisComplete, yandexConfig]);
+  }, [file, onComplete, yandexConfig]);
 
   const CurrentStepIcon = analysisSteps[currentStep]?.icon;
 
