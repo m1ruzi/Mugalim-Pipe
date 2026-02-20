@@ -137,7 +137,7 @@ class ScoringService {
     let aiReport;
     try {
       console.log('🤖 Generating AI-enhanced professional report...');
-      
+
       const currentLanguage = languageService.getCurrentLanguage();
       const geminiRequest: GeminiAnalysisRequest = {
         transcription: speechMetrics.transcription,
@@ -159,12 +159,12 @@ class ScoringService {
       };
 
       aiReport = await geminiAIService.generateProfessionalReport(geminiRequest);
-      
-      // Enhance metrics with AI recommendations
-      await this.enhanceMetricsWithAI(metrics, currentLanguage);
-      
+
+      // ОТКЛЮЧЕНО: Enhance metrics with AI recommendations (слишком долго)
+      // await this.enhanceMetricsWithAI(metrics, currentLanguage);
+
       console.log('✅ AI-enhanced analysis completed');
-      
+
     } catch (error) {
       console.error('❌ AI analysis failed, using fallback:', error);
       aiReport = undefined;
@@ -177,11 +177,127 @@ class ScoringService {
       grade,
       metrics,
       overallFeedback: this.generateOverallFeedback(percentage, metrics),
-      priorityAreas: this.identifyPriorityAreas(metrics),
-      strengths: this.identifyStrengths(metrics),
+      strengths: this.identifyStrengths(metrics), // Сильные стороны на основе баллов
+      priorityAreas: this.identifyPriorityAreas(metrics), // Зоны роста на основе баллов
       improvementPlan: this.generateImprovementPlan(metrics),
       aiReport
     };
+  }
+
+  /**
+   * Определяет СИЛЬНЫЕ стороны на основе метрик с высокими баллами
+   */
+  private identifyStrengths(metrics: DetailedMetrics): string[] {
+    const strengths: string[] = [];
+
+    // Поза и осанка - сильные стороны
+    if (metrics.posture.score >= 140) {
+      if (metrics.posture.spineAlignment >= 35) strengths.push('Прямая осанка на протяжении урока');
+      if (metrics.posture.shoulderSymmetry >= 35) strengths.push('Симметричное положение плеч');
+      if (metrics.posture.confidence >= 35) strengths.push('Уверенная поза преподавателя');
+    }
+
+    // Жестикуляция - сильные стороны
+    if (metrics.gesticulation.score >= 140) {
+      if (metrics.gesticulation.variety >= 35) strengths.push('Разнообразные жесты');
+      if (metrics.gesticulation.expressiveness >= 35) strengths.push('Выразительная жестикуляция');
+      if (metrics.gesticulation.coordination >= 35) strengths.push('Координированные движения руками');
+    }
+
+    // Мимика - сильные стороны
+    if (metrics.facial.score >= 140) {
+      if (metrics.facial.eyeContact >= 35) strengths.push('Хороший зрительный контакт с аудиторией');
+      if (metrics.facial.expressiveness >= 35) strengths.push('Выразительная мимика');
+      if (metrics.facial.smileFrequency >= 35) strengths.push('Частые улыбки');
+    }
+
+    // Речь - сильные стороны
+    if (metrics.speech.score >= 140) {
+      if (metrics.speech.clarity >= 35) strengths.push('Четкая дикция');
+      if (metrics.speech.vocabulary >= 35) strengths.push('Богатый словарный запас');
+      if (metrics.speech.grammar >= 35) strengths.push('Грамотная речь');
+    }
+
+    // Вовлеченность - сильные стороны
+    if (metrics.engagement.score >= 140) {
+      if (metrics.engagement.energy >= 35) strengths.push('Энергичная подача материала');
+      if (metrics.engagement.charisma >= 35) strengths.push('Харизматичное присутствие');
+      if (metrics.engagement.attention >= 35) strengths.push('Внимательное отношение к аудитории');
+    }
+
+    // Если мало сильных сторон, добавляем общие
+    if (strengths.length === 0) {
+      if (metrics.posture.score >= 100) strengths.push('Стабильная поза');
+      if (metrics.gesticulation.score >= 100) strengths.push('Использование жестов');
+      if (metrics.facial.score >= 100) strengths.push('Эмоциональная вовлеченность');
+      if (metrics.speech.score >= 100) strengths.push('Понятная речь');
+      if (metrics.engagement.score >= 100) strengths.push('Вовлеченность в процесс');
+    }
+
+    // Если все еще пусто, возвращаем дефолтные
+    if (strengths.length === 0) {
+      strengths.push('Понимание материала урока', 'Стремление к развитию', 'Работа над собой');
+    }
+
+    return strengths.slice(0, 5); // Максимум 5 сильных сторон
+  }
+
+  /**
+   * Определяет ЗОНЫ РОСТА на основе метрик с низкими баллами
+   */
+  private identifyPriorityAreas(metrics: DetailedMetrics): string[] {
+    const areas: string[] = [];
+
+    // Поза и осанка - проблемы
+    if (metrics.posture.score < 120) {
+      if (metrics.posture.spineAlignment < 30) areas.push('Работать над выравниванием позвоночника');
+      if (metrics.posture.shoulderSymmetry < 30) areas.push('Контролировать симметрию плеч');
+      if (metrics.posture.headPosition < 30) areas.push('Держать голову прямо');
+      if (metrics.posture.stability < 30) areas.push('Уменьшить избыточные движения');
+    }
+
+    // Жестикуляция - проблемы
+    if (metrics.gesticulation.score < 120) {
+      if (metrics.gesticulation.variety < 30) areas.push('Разнообразить жесты');
+      if (metrics.gesticulation.frequency < 30) areas.push('Добавить больше жестов');
+      if (metrics.gesticulation.expressiveness < 30) areas.push('Улучшить выразительность жестов');
+    }
+
+    // Мимика - проблемы
+    if (metrics.facial.score < 120) {
+      if (metrics.facial.eyeContact < 30) areas.push('Поддерживать зрительный контакт');
+      if (metrics.facial.smileFrequency < 30) areas.push('Чаще улыбаться');
+      if (metrics.facial.expressiveness < 30) areas.push('Развивать эмоциональную выразительность');
+    }
+
+    // Речь - проблемы
+    if (metrics.speech.score < 120) {
+      if (metrics.speech.clarity < 30) areas.push('Работать над четкостью речи');
+      if (metrics.speech.pace < 30) areas.push('Контролировать темп речи');
+      if (metrics.speech.fillerWords > 5) areas.push('Сократить слова-паразиты');
+    }
+
+    // Вовлеченность - проблемы
+    if (metrics.engagement.score < 120) {
+      if (metrics.engagement.energy < 30) areas.push('Добавить энергии в подачу');
+      if (metrics.engagement.charisma < 30) areas.push('Развивать харизму');
+      if (metrics.engagement.interaction < 30) areas.push('Взаимодействовать с аудиторией');
+    }
+
+    // Если мало проблем, добавляем общие рекомендации
+    if (areas.length === 0) {
+      if (metrics.posture.score < 160) areas.push('Продолжать работать над осанкой');
+      if (metrics.gesticulation.score < 160) areas.push('Совершенствовать жестикуляцию');
+      if (metrics.facial.score < 160) areas.push('Развивать мимику');
+      if (metrics.speech.score < 160) areas.push('Улучшать речь');
+    }
+
+    // Если все еще пусто, возвращаем дефолтные
+    if (areas.length === 0) {
+      areas.push('Продолжать профессиональное развитие', 'Изучать новые методики преподавания');
+    }
+
+    return areas.slice(0, 5); // Максимум 5 зон роста
   }
 
   /**
@@ -697,86 +813,6 @@ class ScoringService {
     } else {
       return "Рекомендуется интенсивная работа над развитием педагогических навыков. Начните с базовых упражнений для осанки, речи и жестикуляции. Регулярная практика и анализ своих уроков помогут вам достичь прогресса.";
     }
-  }
-
-  private identifyPriorityAreas(metrics: DetailedMetrics): string[] {
-    const areas: { name: string; score: number }[] = [
-      { name: "Поза и осанка", score: metrics.posture.score },
-      { name: "Жестикуляция", score: metrics.gesticulation.score },
-      { name: "Мимика и выражение лица", score: metrics.facial.score },
-      { name: "Речь и дикция", score: metrics.speech.score },
-      { name: "Вовлеченность аудитории", score: metrics.engagement.score }
-    ];
-
-    return areas
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 3)
-      .map(area => area.name);
-  }
-
-  private identifyStrengths(metrics: DetailedMetrics): string[] {
-    const strengths: string[] = [];
-
-    // Поза и осанка
-    if (metrics.posture.score >= 180) {
-      strengths.push("Идеальная осанка — вы выглядите уверенно и профессионально");
-      strengths.push("Отличная стабильность положения тела во время урока");
-    } else if (metrics.posture.score >= 160) {
-      strengths.push("Хорошая осанка и уверенная поза");
-      strengths.push("Правильное положение позвоночника при преподавании");
-    } else if (metrics.posture.score >= 140) {
-      strengths.push("Достойная осанка с небольшими недочётами");
-    }
-
-    // Жестикуляция
-    if (metrics.gesticulation.score >= 180) {
-      strengths.push("Мастерское владение языком жестов");
-      strengths.push("Жесты естественно дополняют и усиливают вашу речь");
-      strengths.push("Отличная координация между словами и движениями рук");
-    } else if (metrics.gesticulation.score >= 160) {
-      strengths.push("Выразительная и разнообразная жестикуляция");
-      strengths.push("Уместное использование жестов для акцентирования");
-    } else if (metrics.gesticulation.score >= 140) {
-      strengths.push("Хорошее использование базовых педагогических жестов");
-    }
-
-    // Мимика
-    if (metrics.facial.score >= 180) {
-      strengths.push("Превосходная эмоциональная выразительность");
-      strengths.push("Естественный зрительный контакт с аудиторией");
-      strengths.push("Искренняя и располагающая улыбка");
-    } else if (metrics.facial.score >= 160) {
-      strengths.push("Живая мимика и хороший зрительный контакт");
-      strengths.push("Эмоционально насыщенная подача материала");
-    } else if (metrics.facial.score >= 140) {
-      strengths.push("Достаточная выразительность лица");
-    }
-
-    // Речь
-    if (metrics.speech.score >= 180) {
-      strengths.push("Безупречная дикция и артикуляция");
-      strengths.push("Богатый словарный запас и грамотная речь");
-      strengths.push("Оптимальный темп речи для восприятия");
-    } else if (metrics.speech.score >= 160) {
-      strengths.push("Четкая речь и богатый словарный запас");
-      strengths.push("Минимальное использование слов-паразитов");
-    } else if (metrics.speech.score >= 140) {
-      strengths.push("Понятная речь с хорошей дикцией");
-    }
-
-    // Вовлеченность
-    if (metrics.engagement.score >= 180) {
-      strengths.push("Выдающаяся харизма и присутствие в кадре");
-      strengths.push("Высокий уровень энергии на протяжении всего урока");
-      strengths.push("Мастерское удержание внимания аудитории");
-    } else if (metrics.engagement.score >= 160) {
-      strengths.push("Высокий уровень вовлеченности аудитории");
-      strengths.push("Энергичная и увлекательная подача");
-    } else if (metrics.engagement.score >= 140) {
-      strengths.push("Хороший контакт с аудиторией");
-    }
-
-    return strengths.length > 0 ? strengths : ["Базовые педагогические навыки присутствуют"];
   }
 
   private generateImprovementPlan(metrics: DetailedMetrics): string[] {

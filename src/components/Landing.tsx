@@ -1,100 +1,117 @@
-import SilkSimple from './SilkSimple';
+import { motion } from 'framer-motion';
+import { ArrowRight, Sparkles, Zap, Video, Brain, BarChart3, Users, Award, Shield } from 'lucide-react';
 
 interface LandingProps {
   onLoginClick: () => void;
 }
 
 export default function Landing({ onLoginClick }: LandingProps) {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.5, staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-apple-gray-50 to-white flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* Silk Background */}
-      <SilkSimple
-        speed={3}
-        scale={1.5}
-        color="#682c2c"
-        noiseIntensity={1.2}
-        rotation={0}
-      />
-      
+    <div className="min-h-screen flex flex-col relative">
       {/* Main Content */}
-      <div className="text-center max-w-3xl mx-auto relative z-10">
-        {/* Logo */}
-        <div className="mb-8 flex justify-center">
-          <img 
-            src="/logo-book.png" 
-            alt="MugalimPipe Logo" 
-            className="w-24 h-24 sm:w-32 sm:h-32 object-contain"
-          />
-        </div>
-
-        {/* Title */}
-        <h1 className="text-5xl sm:text-7xl font-700 tracking-tight mb-6 bg-gradient-to-r from-carmine-600 to-carmine-700 bg-clip-text text-transparent">
-          MugalimPipe
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-2xl sm:text-4xl font-600 text-gray-900 mb-8 leading-tight">
-          Оцени свои педагогические навыки
-        </p>
-
-        {/* Description */}
-        <p className="text-lg text-gray-600 mb-12 leading-relaxed max-w-2xl mx-auto">
-          Инновационная платформа для анализа и улучшения качества преподавания. 
-          Используйте передовые технологии AI для получения детальной обратной связи по вашим педагогическим навыкам.
-        </p>
-
-        {/* CTA Button */}
-        <button
-          onClick={onLoginClick}
-          className="px-8 py-4 bg-carmine-600 text-white text-lg font-600 rounded-2xl hover:bg-carmine-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+      <main className="flex-1 flex items-center justify-center px-4 py-20 relative z-10">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="text-center max-w-5xl mx-auto"
         >
-          Начать анализ
-        </button>
-
-        {/* Features Preview */}
-        <div className="mt-20 grid md:grid-cols-3 gap-8">
-          <div className="p-6 bg-white rounded-xl border border-apple-gray-200 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 bg-carmine-50 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">📹</span>
+          {/* Badge */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <div className="liquid-badge">
+              <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+              <span className="text-xs font-700 uppercase tracking-wide text-[var(--text-primary)]">ENACTUS MARGULAN</span>
+              <Zap className="w-4 h-4 text-[var(--accent)]" />
             </div>
-            <h3 className="font-600 text-gray-900 mb-2">Загрузи видео</h3>
-            <p className="text-sm text-gray-500">Отправь запись своего урока или выступления</p>
-          </div>
+          </motion.div>
 
-          <div className="p-6 bg-white rounded-xl border border-apple-gray-200 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 bg-carmine-50 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">🧠</span>
-            </div>
-            <h3 className="font-600 text-gray-900 mb-2">AI Анализ</h3>
-            <p className="text-sm text-gray-500">Получи детальный анализ твоих навыков преподавания</p>
-          </div>
+          {/* Main Title */}
+          <motion.h1
+            variants={itemVariants}
+            className="text-7xl sm:text-8xl md:text-9xl font-800 tracking-tight mb-6 text-gradient"
+            style={{ textShadow: '0 0 80px rgba(128, 0, 32, 0.5)' }}
+          >
+            MugalimPipe
+          </motion.h1>
 
-          <div className="p-6 bg-white rounded-xl border border-apple-gray-200 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 bg-carmine-50 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">📊</span>
-            </div>
-            <h3 className="font-600 text-gray-900 mb-2">Рекомендации</h3>
-            <p className="text-sm text-gray-500">Получи рекомендации для улучшения качества преподавания</p>
-          </div>
-        </div>
+          {/* Subtitle */}
+          <motion.h2
+            variants={itemVariants}
+            className="text-4xl sm:text-5xl md:text-6xl font-700 tracking-tight text-[var(--text-primary)] mb-8"
+          >
+            Оцените свои <span className="text-gradient">педагогические навыки</span>
+          </motion.h2>
 
-        {/* Stats */}
-        <div className="mt-20 grid md:grid-cols-2 gap-8">
-          <div className="p-6 bg-carmine-50 rounded-xl">
-            <div className="text-4xl font-700 text-carmine-600 mb-2">1000+</div>
-            <p className="text-gray-600">Учителей уже улучшили свои навыки</p>
-          </div>
-          <div className="p-6 bg-carmine-50 rounded-xl">
-            <div className="text-4xl font-700 text-carmine-600 mb-2">95%</div>
-            <p className="text-gray-600">Удовлетворены результатами анализа</p>
-          </div>
-        </div>
-      </div>
+          {/* Description */}
+          <motion.p
+            variants={itemVariants}
+            className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-3xl mx-auto leading-relaxed"
+          >
+            Инновационная платформа с использованием AI для детального анализа ваших уроков.
+            Получите персональные рекомендации для профессионального роста.
+          </motion.p>
 
-      {/* Footer on Landing */}
-      <div className="mt-20 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-        <p>© 2026 MugalimPipe. Платформа для развития педагогических навыков.</p>
-      </div>
+          {/* CTA Buttons */}
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 12px 40px rgba(255, 45, 85, 0.5)' }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onLoginClick}
+              className="group px-8 py-4 liquid-button liquid-button-primary text-lg flex items-center gap-3"
+            >
+              Начать анализ
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </motion.div>
+
+          {/* Features */}
+          <motion.div variants={containerVariants} className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Video,
+                title: 'Загрузи видео',
+                description: 'Отправь запись своего урока или выступления в любом формате',
+                gradient: 'from-[var(--accent)] to-[var(--accent-light)]'
+              },
+              {
+                icon: Brain,
+                title: 'AI Анализ',
+                description: 'Получи детальный анализ позы, жестов, мимики и речи',
+                gradient: 'from-[var(--accent)] to-[var(--purple)]'
+              },
+              {
+                icon: BarChart3,
+                title: 'Рекомендации',
+                description: 'Персональные советы для улучшения навыков преподавания',
+                gradient: 'from-[var(--accent-dark)] to-[var(--accent)]'
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="liquid-glass p-8"
+              >
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 mx-auto shadow-lg`}>
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-600 text-[var(--text-primary)] mb-3">{feature.title}</h3>
+                <p className="text-[var(--text-secondary)] leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+      </main>
     </div>
   );
 }

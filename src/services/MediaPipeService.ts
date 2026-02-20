@@ -362,25 +362,31 @@ class MediaPipeService {
   }
 
   async analyzeVideo(
-    videoFile: File, 
+    videoFile: File,
     onProgress: (progress: number) => void
   ): Promise<DetailedAnalysisResult> {
     if (!this.isInitialized) {
       throw new Error('MediaPipe services not initialized. Call initialize() first.');
     }
 
+    console.log('🎬 Starting MediaPipe video analysis...', {
+      poseInitialized: !!this.poseLandmarker,
+      gestureInitialized: !!this.gestureRecognizer,
+      faceInitialized: !!this.faceLandmarker
+    });
+
     return new Promise((resolve, reject) => {
       const video = document.createElement('video');
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
-      
+
       // Enhanced video properties for better compatibility
       video.src = URL.createObjectURL(videoFile);
       video.muted = true;
       video.crossOrigin = 'anonymous';
       video.preload = 'metadata';
-      video.playsInline = true; // Better mobile support
-      
+      video.playsInline = true;
+
       const analysisData = {
         poseData: [] as PoseFrameData[],
         gestureData: [] as GestureFrameData[],
@@ -393,19 +399,17 @@ class MediaPipeService {
         skippedFrames: 0
       };
 
-      // Enhanced adaptive frame interval
-      let frameInterval = 0.2; // Start with 200ms for better performance
+      let frameInterval = 0.2;
       let currentTime = 0;
       let lastProcessedTime = -1;
 
       video.onloadedmetadata = () => {
         try {
-          // Enhanced canvas dimensions with aspect ratio preservation
-          const maxWidth = 640; // Reduced for better performance
+          const maxWidth = 640;
           const maxHeight = 480;
-          
+
           const aspectRatio = video.videoWidth / video.videoHeight;
-          
+
           if (aspectRatio > maxWidth / maxHeight) {
             canvas.width = maxWidth;
             canvas.height = maxWidth / aspectRatio;
@@ -413,33 +417,34 @@ class MediaPipeService {
             canvas.width = maxHeight * aspectRatio;
             canvas.height = maxHeight;
           }
-          
+
           analysisData.videoDuration = video.duration;
-          
-          // Enhanced adaptive frame interval based on video duration and performance
-          if (video.duration > 300) { // > 5 minutes
-            frameInterval = 1.0; // 1 second intervals
-          } else if (video.duration > 120) { // > 2 minutes
-            frameInterval = 0.5; // 500ms intervals
+
+          if (video.duration > 300) {
+            frameInterval = 1.0;
+          } else if (video.duration > 120) {
+            frameInterval = 0.5;
           } else {
-            frameInterval = 0.2; // 200ms intervals
+            frameInterval = 0.2;
           }
-          
+
           analysisData.totalFrames = Math.floor(video.duration / frameInterval);
-          
-          console.log(`📹 Enhanced video analysis setup:`, {
+
+          console.log(`📹 Video analysis setup:`, {
             duration: video.duration,
             frameInterval,
             totalFrames: analysisData.totalFrames,
-            canvasSize: `${canvas.width}x${canvas.height}`
+            canvasSize: `${canvas.width}x${canvas.height}`,
+            videoFile: videoFile.name,
+            videoSize: (videoFile.size / 1024 / 1024).toFixed(2) + ' MB'
           });
-          
+
           video.currentTime = 0;
           video.play().catch(error => {
             console.error('Video play failed:', error);
             reject(new Error('Failed to play video'));
           });
-          
+
         } catch (error) {
           console.error('Video metadata processing failed:', error);
           reject(new Error('Failed to process video metadata'));
@@ -448,39 +453,43 @@ class MediaPipeService {
 
       video.ontimeupdate = async () => {
         try {
-          // Check if we've reached the end
           if (video.currentTime >= video.duration) {
             video.pause();
-            
+            URL.revokeObjectURL(video.src);
+
+            console.log('🎉 Analysis complete!', {
+              poseFrames: analysisData.poseData.length,
+              gestureFrames: analysisData.gestureData.length,
+              faceFrames: analysisData.faceData.length,
+              totalFrames: analysisData.frameCount,
+              errors: analysisData.errorCount
+            });
+
             const result = this.buildAnalysisResult(analysisData);
-            console.log('🎉 Enhanced analysis complete:', result.analysisQuality);
             resolve(result);
             return;
           }
 
-          // Enhanced frame processing logic
-          if (Math.abs(video.currentTime - currentTime) >= frameInterval && 
+          if (Math.abs(video.currentTime - currentTime) >= frameInterval &&
               video.currentTime !== lastProcessedTime) {
-            
+
             currentTime = video.currentTime;
             lastProcessedTime = video.currentTime;
-            
+
             try {
               await this.processVideoFrameEnhanced(video, canvas, ctx, analysisData);
-              
-              // Update progress with smoother calculation
+
               const progress = (video.currentTime / video.duration) * 100;
               onProgress(Math.min(99, progress));
-              
+
             } catch (frameError) {
               console.warn(`Frame processing error at ${video.currentTime}s:`, frameError);
               analysisData.errorCount++;
             }
           }
 
-          // Move to next frame with enhanced timing
           video.currentTime += frameInterval;
-          
+
         } catch (error) {
           console.error('Time update error:', error);
           analysisData.errorCount++;
@@ -497,15 +506,13 @@ class MediaPipeService {
         reject(new Error('Video loading was aborted'));
       };
 
-      // Enhanced timeout protection
       const timeout = setTimeout(() => {
         if (analysisData.frameCount === 0) {
           video.pause();
           reject(new Error('Video analysis timeout - no frames processed within 90 seconds'));
         }
-      }, 90000); // 90 seconds timeout
+      }, 90000);
 
-      // Cleanup timeout when video ends
       video.onended = () => {
         clearTimeout(timeout);
       };

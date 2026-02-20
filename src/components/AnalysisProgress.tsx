@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Brain, Eye, Users, MessageSquare, BarChart3, Mic, FileText, CheckCircle, Wifi, Languages, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface AnalysisProgressProps {
   file: File;
@@ -35,7 +36,6 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
   const fileName = file.name;
   const onAnalysisComplete = onComplete;
 
-  // Изменено: Цвета заменены на системные ч/б
   const analysisSteps = [
     { icon: Eye, title: "Инициализация MediaPipe", description: "Загрузка моделей анализа" },
     { icon: Users, title: "Анализ позы и движений", description: "Осанка и уверенность" },
@@ -51,38 +51,38 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
         setCurrentStep(0);
         setProgress(5);
         setDetailedProgress(prev => ({ ...prev, initialization: 20 }));
-        
+
         const { mediaPipeService } = await import('../services/MediaPipeService');
         await mediaPipeService.initialize();
-        
+
         setDetailedProgress(prev => ({ ...prev, initialization: 100 }));
         setProgress(15);
-        
+
         setCurrentStep(1);
         setProgress(20);
-        
+
         const videoAnalysis = await mediaPipeService.analyzeVideo(videoFile, (videoProgress) => {
-          const adjustedProgress = 20 + (videoProgress * 0.4); 
+          const adjustedProgress = 20 + (videoProgress * 0.4);
           setProgress(adjustedProgress);
           setDetailedProgress(prev => ({ ...prev, videoAnalysis: videoProgress }));
         });
-        
+
         const analysisQuality = mediaPipeService.getAnalysisQuality(videoAnalysis);
-        setQualityMetrics(prev => ({ 
-          ...prev, 
+        setQualityMetrics(prev => ({
+          ...prev,
           videoQuality: `${videoAnalysis.frameCount} кадров`,
-          analysisQuality 
+          analysisQuality
         }));
-        
+
         setCurrentStep(2);
         setProgress(60);
-        
+
         setCurrentStep(3);
         setProgress(65);
         setDetailedProgress(prev => ({ ...prev, audioAnalysis: 20 }));
-        
+
         const { audioAnalysisService } = await import('../services/AudioAnalysisService');
-        
+
         if (yandexConfig.enabled) {
           audioAnalysisService.updateConfig({
             useYandexSpeechKit: true,
@@ -91,61 +91,113 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
             includeFillerWords: yandexConfig.includeFillerWords
           });
         }
-        
+
         const audioAnalysis = await audioAnalysisService.analyzeAudio(videoFile, (audioProgress) => {
           setDetailedProgress(prev => ({ ...prev, audioAnalysis: audioProgress }));
         });
-        
+
         setDetailedProgress(prev => ({ ...prev, audioAnalysis: 100 }));
-        
+
         let transcriptionInfo = 'Обработка...';
         if (audioAnalysis.transcriptionMetadata) {
           const meta = audioAnalysis.transcriptionMetadata;
           transcriptionInfo = `AI: ${Math.round(meta.confidence * 100)}% (${meta.fillerWordsCount} зап.)`;
         }
-        
+
         setQualityMetrics(prev => ({ ...prev, audioQuality: transcriptionInfo }));
-        
+
         setCurrentStep(4);
         setProgress(80);
-        
+
         setCurrentStep(5);
         setProgress(85);
         setDetailedProgress(prev => ({ ...prev, scoring: 30 }));
-        
-        const { scoringService } = await import('../services/ScoringService');
-        const comprehensiveResults = await scoringService.calculateComprehensiveScore(
-          videoAnalysis.poseData,
-          videoAnalysis.gestureData,
-          videoAnalysis.faceData,
-          audioAnalysis,
-          videoAnalysis.videoDuration
-        );
-        
-        setDetailedProgress(prev => ({ ...prev, scoring: 100 }));
-        setProgress(100);
-        
-        const finalResults = {
-          ...comprehensiveResults,
-          analysisDetails: {
-            videoAnalysis,
+
+        try {
+          const { scoringService } = await import('../services/ScoringService');
+          
+          console.log('🔍 Preparing data for ScoringService:', {
+            poseDataLength: videoAnalysis.poseData.length,
+            gestureDataLength: videoAnalysis.gestureData.length,
+            faceDataLength: videoAnalysis.faceData.length,
+            videoDuration: videoAnalysis.videoDuration,
+            hasTranscription: !!audioAnalysis.transcription
+          });
+
+          const comprehensiveResults = await scoringService.calculateComprehensiveScore(
+            videoAnalysis.poseData,
+            videoAnalysis.gestureData,
+            videoAnalysis.faceData,
             audioAnalysis,
-            qualityMetrics: { ...qualityMetrics, analysisQuality },
-            multilingualAnalysis: {
-              yandexSpeechKitUsed: yandexConfig.enabled,
-              detectedLanguages: audioAnalysis.transcriptionMetadata?.detectedLanguages || [],
-              fillerWordsCount: audioAnalysis.transcriptionMetadata?.fillerWordsCount || 0
+            videoAnalysis.videoDuration
+          );
+
+          console.log('🎯 ScoringService Results:', {
+            totalScore: comprehensiveResults.totalScore,
+            strengths: comprehensiveResults.strengths,
+            priorityAreas: comprehensiveResults.priorityAreas,
+            postureScore: comprehensiveResults.metrics.posture.score,
+            speechScore: comprehensiveResults.metrics.speech.score
+          });
+
+          setDetailedProgress(prev => ({ ...prev, scoring: 100 }));
+          setProgress(100);
+
+          const finalResults = {
+            ...comprehensiveResults,
+            analysisDetails: {
+              videoAnalysis,
+              audioAnalysis,
+              qualityMetrics: { ...qualityMetrics, analysisQuality },
+              multilingualAnalysis: {
+                yandexSpeechKitUsed: yandexConfig.enabled,
+                detectedLanguages: audioAnalysis.transcriptionMetadata?.detectedLanguages || [],
+                fillerWordsCount: audioAnalysis.transcriptionMetadata?.fillerWordsCount || 0
+              }
             }
-          }
-        };
-        
-        setTimeout(() => {
-          onAnalysisComplete(finalResults);
-        }, 1500);
-        
+          };
+
+          setTimeout(() => {
+            onAnalysisComplete(finalResults);
+          }, 1500);
+
+        } catch (scoringError) {
+          console.error('❌ ScoringService error:', scoringError);
+          console.error('Error details:', {
+            message: scoringError instanceof Error ? scoringError.message : 'Unknown error',
+            stack: scoringError instanceof Error ? scoringError.stack : 'No stack trace'
+          });
+          
+          // Fallback - создаем минимальные результаты
+          const fallbackResults = {
+            totalScore: 500,
+            maxTotalScore: 1000,
+            percentage: 50,
+            grade: 'C',
+            metrics: {
+              posture: { score: 100, maxScore: 200 },
+              gesticulation: { score: 100, maxScore: 200 },
+              facial: { score: 100, maxScore: 200 },
+              speech: { score: 100, maxScore: 200 },
+              engagement: { score: 100, maxScore: 200 }
+            },
+            strengths: ['Анализ завершен с ошибками', 'Повторите попытку'],
+            priorityAreas: ['Проверьте качество видео', 'Убедитесь что человек виден в кадре'],
+            overallFeedback: 'Произошла ошибка при анализе. Попробуйте загрузить видео лучшего качества.',
+            aiReport: null
+          };
+
+          setDetailedProgress(prev => ({ ...prev, scoring: 100 }));
+          setProgress(100);
+
+          setTimeout(() => {
+            onAnalysisComplete(fallbackResults);
+          }, 1500);
+        }
+
       } catch (error) {
         console.error('Analysis failed:', error);
-        setProgress(100); // Fallback to results on error
+        setProgress(100);
       }
     };
 
@@ -157,159 +209,198 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
   return (
     <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 space-y-8 md:space-y-12">
       {/* Header */}
-      <div className="space-y-4">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-600 tracking-tight text-gray-900">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center"
+      >
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-700 tracking-tight text-[var(--text-primary)] mb-3">
           Анализ видео
         </h1>
-        <p className="text-sm sm:text-base text-gray-500 font-400">
-          <span className="font-600 text-gray-900">{fileName}</span> • обработка в процессе...
+        <p className="text-sm sm:text-base text-[var(--text-secondary)]">
+          <span className="font-600 text-[var(--text-primary)]">{fileName}</span> • обработка в процессе...
         </p>
-      </div>
-
-      {/* Main Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs md:text-sm font-600 text-gray-600 uppercase tracking-wide">Общий прогресс</span>
-          <span className="text-xs md:text-sm font-600 text-gray-900">{Math.round(progress)}%</span>
-        </div>
-        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-carmine-600 to-carmine-500 h-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          >
-            <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
-          </div>
-        </div>
-      </div>
+      </motion.div>
 
       {/* Status Badge */}
-      <div className="flex items-center space-x-3 p-3 md:p-4 bg-carmine-50 rounded-xl md:rounded-2xl border border-carmine-100">
-        <div className="w-8 h-8 md:w-10 md:h-10 bg-carmine-600 rounded-lg md:rounded-xl flex items-center justify-center">
-          <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-white animate-spin" />
-        </div>
-        <div>
-          <h3 className="text-sm md:text-base font-600 text-gray-900">Выполняется анализ</h3>
-          <p className="text-xs md:text-sm text-gray-500 font-400">Google Gemini AI обрабатывает видео</p>
-        </div>
-      </div>
-
-      {/* Security Indicator */}
-      <div className="bg-apple-gray-100 rounded-2xl md:rounded-3xl p-4 md:p-6 border border-gray-200 mb-6 md:mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
-          <div className="flex items-center space-x-3 md:space-x-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-carmine-600 rounded-xl flex items-center justify-center shadow-sm">
-              <Wifi className="w-5 h-5 md:w-6 md:h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-sm md:text-base font-600 text-gray-900">Безопасное соединение</h3>
-              <p className="text-xs md:text-sm text-gray-500 font-400">Yandex SpeechKit v3 + Gemini Cloud</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 text-gray-600 bg-apple-gray-50 px-3 md:px-4 py-2 rounded-lg border border-apple-gray-200 shadow-sm text-xs md:text-sm font-600">
-            <CheckCircle className="w-4 h-4" />
-            <span>Шифрование активно</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Progress Bar — Жирный черный стиль */}
-      <div className="bg-apple-gray-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-apple-gray-200 shadow-sm mb-6 md:mb-8">
-        <div className="mb-8 md:mb-10">
-          <div className="flex justify-between items-end mb-3 md:mb-4 px-1">
-            <span className="text-[12px] md:text-[13px] font-bold uppercase tracking-widest text-gray-500">Общий прогресс</span>
-            <span className="text-2xl md:text-3xl font-semibold tracking-tighter">{Math.round(progress)}%</span>
-          </div>
-            <div className="w-full bg-[#F5F5F7] rounded-full h-2 md:h-3 overflow-hidden">
-            <div 
-              className="bg-carmine-700 h-full transition-all duration-700 ease-in-out relative"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Текущий этап */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 bg-carmine-50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-carmine-100">
-          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-carmine-600 flex items-center justify-center shadow-md animate-in fade-in zoom-in duration-500">
-            {CurrentStepIcon && <CurrentStepIcon className="w-6 h-6 md:w-7 md:h-7 text-white" />}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="liquid-glass p-4 md:p-6"
+      >
+        <div className="flex items-center space-x-4">
+          <div className="liquid-glass w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center">
+            <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-[var(--accent)] animate-spin" />
           </div>
           <div>
-            <h3 className="text-base md:text-lg font-600 text-gray-900 tracking-tight leading-none mb-1">
-              {analysisSteps[currentStep]?.title}
-            </h3>
-            <p className="text-sm text-gray-500 font-400 tracking-tight">
-              {analysisSteps[currentStep]?.description}
-            </p>
+            <h3 className="text-base md:text-lg font-600 text-[var(--text-primary)]">Выполняется анализ</h3>
+            <p className="text-sm text-[var(--text-secondary)]">Google Gemini AI обрабатывает видео</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Detailed Progress Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      {/* Security Indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="liquid-glass p-4 md:p-6"
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="liquid-glass w-12 h-12 rounded-xl flex items-center justify-center">
+              <Wifi className="w-6 h-6 text-[var(--accent)]" />
+            </div>
+            <div>
+              <h3 className="text-base font-600 text-[var(--text-primary)]">Безопасное соединение</h3>
+              <p className="text-sm text-[var(--text-secondary)]">Yandex SpeechKit v3 + Gemini Cloud</p>
+            </div>
+          </div>
+          <div className="liquid-badge">
+            <CheckCircle className="w-4 h-4 text-[var(--accent)]" />
+            <span className="text-xs font-600 text-[var(--text-primary)]">Шифрование активно</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Main Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="liquid-glass p-6 md:p-8"
+      >
+        <div className="mb-8">
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-xs font-700 uppercase tracking-wider text-[var(--text-secondary)]">Общий прогресс</span>
+            <span className="text-3xl font-700 text-gradient">{Math.round(progress)}%</span>
+          </div>
+          <div className="liquid-glass h-3 rounded-full overflow-hidden">
+            <motion.div
+              className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        </div>
+
+        {/* Current Step */}
+        <div className="liquid-glass p-4 md:p-6">
+          <div className="flex items-center space-x-4">
+            <div className="liquid-glass liquid-button-primary w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center shadow-lg">
+              {CurrentStepIcon && <CurrentStepIcon className="w-7 h-7 md:w-8 md:h-8 text-white" />}
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-600 text-[var(--text-primary)] tracking-tight leading-none mb-1">
+                {analysisSteps[currentStep]?.title}
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {analysisSteps[currentStep]?.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Detailed Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4"
+      >
         {[
           { key: 'initialization', label: 'Инициализация', icon: Brain },
-          { key: 'videoAnalysis', label: 'Видео поток', icon: Eye },
-          { key: 'audioAnalysis', label: 'Речь и AI', icon: Languages },
-          { key: 'scoring', label: 'Финальный счет', icon: BarChart3 }
-        ].map((item) => (
-          <div key={item.key} className="bg-apple-gray-50 rounded-2xl p-4 border border-apple-gray-200 shadow-sm">
+          { key: 'videoAnalysis', label: 'Видео', icon: Eye },
+          { key: 'audioAnalysis', label: 'Аудио', icon: Languages },
+          { key: 'scoring', label: 'Оценка', icon: BarChart3 }
+        ].map((item, index) => (
+          <motion.div
+            key={item.key}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 * index }}
+            className="liquid-glass p-4"
+          >
             <div className="flex items-center justify-between mb-3">
-              <item.icon className="w-4 h-4 text-gray-300" />
-              <span className="text-sm font-600 tracking-tight">
+              <item.icon className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <span className="text-sm font-700 text-[var(--text-primary)]">
                 {Math.round(detailedProgress[item.key as keyof typeof detailedProgress])}%
               </span>
             </div>
-            <div className="text-xs font-600 uppercase tracking-wider text-gray-400 mb-2">{item.label}</div>
-              <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div 
-                className="bg-carmine-600 h-full transition-all duration-500"
-                style={{ width: `${detailedProgress[item.key as keyof typeof detailedProgress]}%` }}
-              ></div>
+            <div className="text-xs font-600 uppercase tracking-wider text-[var(--text-secondary)] mb-2">{item.label}</div>
+            <div className="liquid-glass h-1.5 rounded-full overflow-hidden">
+              <motion.div
+                className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${detailedProgress[item.key as keyof typeof detailedProgress]}%` }}
+              />
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Quality Metrics */}
-      <div className="bg-apple-gray-100 rounded-3xl p-6 md:p-8 border border-gray-200 mb-8">
-        <div className="flex items-center space-x-2 mb-4 opacity-60">
-          <BarChart3 className="w-4 h-4 text-gray-600" />
-          <h3 className="text-xs font-600 uppercase tracking-wider text-gray-600">Качество обработки</h3>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="liquid-glass p-6 md:p-8"
+      >
+        <div className="flex items-center space-x-2 mb-6">
+          <BarChart3 className="w-5 h-5 text-[var(--accent)]" />
+          <h3 className="text-xs font-700 uppercase tracking-wider text-[var(--text-secondary)]">Качество обработки</h3>
         </div>
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
-            { label: 'Видео сигнал', value: qualityMetrics.videoQuality, icon: Eye },
-            { label: 'Аудио (filler words)', value: qualityMetrics.audioQuality, icon: Languages },
+            { label: 'Видео', value: qualityMetrics.videoQuality, icon: Eye },
+            { label: 'Аудио', value: qualityMetrics.audioQuality, icon: Languages },
             { label: 'AI Точность', value: qualityMetrics.analysisQuality, icon: Brain }
           ].map((metric, index) => (
-            <div key={index} className="space-y-1">
-              <div className="text-xs font-600 text-gray-500 uppercase tracking-wider">{metric.label}</div>
-              <div className="text-sm md:text-base font-600 text-gray-900">{metric.value}</div>
-            </div>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+              className="liquid-glass p-4"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="liquid-glass w-10 h-10 rounded-lg flex items-center justify-center">
+                  <metric.icon className="w-5 h-5 text-[var(--accent)]" />
+                </div>
+                <div className="text-xs font-600 text-[var(--text-secondary)]">{metric.label}</div>
+              </div>
+              <div className="text-sm md:text-base font-600 text-[var(--text-primary)]">{metric.value}</div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Technical Info */}
-      <div className="grid md:grid-cols-4 gap-6 text-xs text-gray-500 font-400 leading-relaxed border-t border-gray-200 pt-8">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="grid md:grid-cols-4 gap-4 text-xs text-[var(--text-tertiary)] liquid-glass p-4"
+      >
         <div>
-          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">MediaPipe Vision</span>
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">MediaPipe Vision</span>
           33 точки позы, 468 точек лица
         </div>
         <div>
-          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Speech Analysis</span>
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Speech Analysis</span>
           Yandex SpeechKit v3 Cloud
         </div>
         <div>
-          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Logic Engine</span>
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Logic Engine</span>
           Google Gemini 1.5 Pro
         </div>
         <div>
-          <span className="text-gray-700 block mb-1 font-600 uppercase tracking-wider">Security</span>
-          Netlify Functions • AES-256
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Security</span>
+          AES-256 Encryption
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
