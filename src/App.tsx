@@ -183,42 +183,41 @@ function App() {
 
               {/* Auth Button */}
               {!session ? (
-                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <div className="flex items-center space-x-2">
                   {/* Support Button */}
                   <a
                     href="https://t.me/q4rzhas"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-green-500/50 hover:bg-green-500/20"
-                    title="Служба поддержки"
+                    className="flex items-center justify-center w-10 h-10 liquid-button text-sm hover:border-green-500/50 hover:bg-green-500/20"
+                    title="Поддержка"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline sm:ml-2">Поддержка</span>
+                    <MessageCircle className="w-5 h-5" />
                   </a>
 
                   <button
                     onClick={() => navigate('/auth')}
-                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-5 sm:py-2.5 liquid-button liquid-button-primary text-xs sm:text-sm"
+                    className="flex items-center justify-center w-10 h-10 liquid-button liquid-button-primary"
+                    title="Войти"
                   >
-                    <CircleUser className="w-4 h-4 sm:hidden" />
-                    <span className="hidden sm:inline">Войти</span>
+                    <CircleUser className="w-5 h-5" />
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={() => navigate('/profile')}
-                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm"
+                    className="flex items-center justify-center w-10 h-10 liquid-button"
+                    title="Профиль"
                   >
-                    <CircleUser className="w-4 h-4 sm:hidden" />
-                    <span className="hidden sm:inline sm:ml-2">Профиль</span>
+                    <CircleUser className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => supabase.auth.signOut()}
-                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-red-500/50 hover:bg-red-500/20"
+                    className="flex items-center justify-center w-10 h-10 liquid-button hover:border-red-500/50 hover:bg-red-500/20"
+                    title="Выход"
                   >
-                    <LogOut className="w-4 h-4 sm:hidden" />
-                    <span className="hidden sm:inline sm:ml-2">Выход</span>
+                    <LogOut className="w-5 h-5" />
                   </button>
                 </div>
               )}
