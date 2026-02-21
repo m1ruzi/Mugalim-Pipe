@@ -1,7 +1,7 @@
 -- ============================================
 -- MugalimPipe - Supabase Database Setup
 -- ============================================
--- Этот скрипт создает все необходимые таблицы, 
+-- Этот скрипт создает все необходимые таблицы,
 -- индексы и политики безопасности для работы с AI отчетами
 -- ============================================
 
@@ -11,41 +11,41 @@
 CREATE TABLE IF NOT EXISTS reports (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  
+
   -- Основная информация
   title TEXT NOT NULL DEFAULT 'Анализ урока',
   description TEXT,
-  
+
   -- Результаты анализа
   total_score INTEGER DEFAULT 0 CHECK (total_score >= 0 AND total_score <= 1000),
   percentage NUMERIC DEFAULT 0 CHECK (percentage >= 0 AND percentage <= 100),
   grade TEXT DEFAULT 'N/A',
-  
+
   -- Детальные метрики (JSON)
   metrics JSONB DEFAULT '{}',
-  
+
   -- AI отчет (JSON)
   ai_report JSONB DEFAULT '{}',
-  
+
   -- Сильные стороны и зоны роста
   strengths TEXT[] DEFAULT '{}',
   priority_areas TEXT[] DEFAULT '{}',
-  
+
   -- Файл отчета (PDF)
   file_name TEXT,
   file_url TEXT,
   storage_path TEXT,
   file_size BIGINT,
-  
+
   -- Метаданные
   video_duration NUMERIC,
   video_file_name TEXT,
   transcription TEXT,
-  
+
   -- Временные метки
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   -- Статус
   status TEXT DEFAULT 'completed' CHECK (status IN ('pending', 'processing', 'completed', 'failed'))
 );
@@ -84,26 +84,9 @@ ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 -- Пользователи могут просматривать ТОЛЬКО свои отчеты
 DROP POLICY IF EXISTS "Users can view own reports" ON reports;
 CREATE POLICY "Users can view own reports"
-  ON reports FOR SELECT
-  USING (auth.uid() = user_id);
-
--- Пользователи могут создавать ТОЛЬКО свои отчеты
-DROP POLICY IF EXISTS "Users can insert own reports" ON reports;
-CREATE POLICY "Users can insert own reports"
-  ON reports FOR INSERT
+  ON reports FOR ALL
+  USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
-
--- Пользователи могут обновлять ТОЛЬКО свои отчеты
-DROP POLICY IF EXISTS "Users can update own reports" ON reports;
-CREATE POLICY "Users can update own reports"
-  ON reports FOR UPDATE
-  USING (auth.uid() = user_id);
-
--- Пользователи могут удалять ТОЛЬКО свои отчеты
-DROP POLICY IF EXISTS "Users can delete own reports" ON reports;
-CREATE POLICY "Users can delete own reports"
-  ON reports FOR DELETE
-  USING (auth.uid() = user_id);
 
 -- ============================================
 -- 5. Создаем таблицу user_statistics (статистика пользователей)
