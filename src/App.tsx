@@ -55,63 +55,82 @@ function App() {
     }
 
     try {
+      console.log('💾 Starting report save...', { 
+        userId: session.user.id,
+        hasAnalysisResults: !!analysisResults,
+        hasAiReport: !!analysisResults?.aiReport 
+      });
+
       // Создаем безопасный путь: user_id/date_filename.pdf
       const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `${session.user.id}/${new Date().toISOString().split('T')[0]}_${safeFileName}`;
 
-      console.log('💾 Saving report to storage:', storagePath);
+      // Пробуем загрузить PDF в storage (опционально)
+      let publicUrl = '';
+      try {
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('reports')
+          .upload(storagePath, pdfBlob, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'application/pdf'
+          });
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('reports')
-        .upload(storagePath, pdfBlob, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: 'application/pdf'
-        });
-
-      if (uploadError) {
-        console.error('Error uploading PDF:', uploadError);
-        throw uploadError;
+        if (uploadError) {
+          console.warn('⚠️ Storage upload failed, continuing without file:', uploadError);
+        } else {
+          console.log('✅ File uploaded to storage:', uploadData);
+          const { data: { publicUrl: url } } = supabase.storage
+            .from('reports')
+            .getPublicUrl(storagePath);
+          publicUrl = url || '';
+          console.log('🔗 Public URL:', publicUrl);
+        }
+      } catch (storageError) {
+        console.warn('⚠️ Storage error, continuing with database only:', storageError);
       }
 
-      console.log('✅ File uploaded:', uploadData);
+      // Сохраняем отчет в базу данных (ОБЯЗАТЕЛЬНО)
+      console.log('💾 Saving to database...');
+      
+      const insertData = {
+        user_id: session.user.id,
+        title: `Анализ урока от ${new Date().toLocaleDateString('ru-RU')}`,
+        file_name: safeFileName,
+        file_url: publicUrl || null,
+        storage_path: publicUrl ? storagePath : null,
+        total_score: analysisResults?.totalScore || 0,
+        percentage: analysisResults?.percentage || 0,
+        grade: analysisResults?.grade || 'N/A',
+        content: analysisResults || {},
+        metrics: analysisResults?.metrics || {},
+        ai_report: analysisResults?.aiReport || {},
+        strengths: analysisResults?.strengths || [],
+        priority_areas: analysisResults?.priorityAreas || [],
+        status: 'completed' as const
+      };
 
-      const { data: { publicUrl } } = supabase.storage
+      console.log('📋 Insert data:', JSON.stringify(insertData, null, 2));
+
+      const { data: dbData, error: dbError } = await supabase
         .from('reports')
-        .getPublicUrl(storagePath);
-
-      console.log('🔗 Public URL:', publicUrl);
-
-      // Сохраняем отчет в базу данных с AI отчетом
-      const { error: dbError } = await supabase
-        .from('reports')
-        .insert([{
-          user_id: session.user.id,
-          title: `Анализ урока от ${new Date().toLocaleDateString('ru-RU')}`,
-          file_name: safeFileName,
-          file_url: publicUrl,
-          storage_path: storagePath,
-          total_score: analysisResults?.totalScore || 0,
-          percentage: analysisResults?.percentage || 0,
-          grade: analysisResults?.grade || 'N/A',
-          content: analysisResults,
-          metrics: analysisResults?.metrics || {},
-          ai_report: analysisResults?.aiReport || {},
-          strengths: analysisResults?.strengths || [],
-          priority_areas: analysisResults?.priorityAreas || [],
-          status: 'completed'
-        }]);
+        .insert(insertData)
+        .select()
+        .single();
 
       if (dbError) {
-        console.error('Error saving report to database:', dbError);
+        console.error('❌ Database error:', dbError);
+        console.error('Error details:', JSON.stringify(dbError, null, 2));
         throw dbError;
       }
 
-      console.log('✅ Report saved to database with AI report');
+      console.log('✅ Report saved to database:', dbData);
       alert('✅ Отчет успешно сохранен!');
     } catch (error: any) {
-      console.error('Error saving report:', error);
-      alert('❌ Ошибка: ' + (error.message || 'Неизвестная ошибка'));
+      console.error('❌ Error saving report:', error);
+      const errorMessage = error.message || 'Неизвестная ошибка';
+      const errorDetails = error.details || error.hint || '';
+      alert('❌ Ошибка: ' + errorMessage + (errorDetails ? '\n' + errorDetails : ''));
     }
   };
 
