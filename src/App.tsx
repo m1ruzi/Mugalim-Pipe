@@ -147,46 +147,34 @@ function App() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative z-10 pt-14 sm:pt-16">
 
       {/* Top Navigation Bar - Liquid Glass Style */}
       <header className="fixed top-0 left-0 right-0 z-20 liquid-nav">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center space-x-3 group"
+              className="flex items-center space-x-2 sm:space-x-3 group"
             >
-              <div className="liquid-glass w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <img src="/logo-book.png" alt="Logo" className="w-7 h-7 object-contain" />
+              <div className="liquid-glass w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <img src="/logo-book.png" alt="Logo" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
               </div>
               <div className="text-left">
-                <h1 className="text-base font-600 tracking-tight text-[var(--text-primary)]">
+                <h1 className="text-sm sm:text-base font-600 tracking-tight text-[var(--text-primary)] whitespace-nowrap">
                   {texts.appTitle}
                 </h1>
-                <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
+                <p className="text-[9px] sm:text-[10px] text-[var(--text-secondary)] uppercase tracking-wider hidden xs:block">
                   {texts.appSubtitle}
                 </p>
               </div>
             </button>
 
             {/* Right side buttons */}
-            <div className="flex items-center space-x-3">
-              {/* Support Button */}
-              <a
-                href="https://t.me/q4rzhas"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 liquid-button text-sm hover:border-green-500/50 hover:bg-green-500/20"
-                title="Служба поддержки"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Поддержка</span>
-              </a>
-
-              {/* Language Selector */}
-              <div className="hidden sm:block">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Language Selector - hidden on mobile */}
+              <div className="hidden md:block">
                 <LanguageSelector
                   currentLanguage={currentLanguage}
                   onLanguageChange={handleLanguageChange}
@@ -195,27 +183,41 @@ function App() {
 
               {/* Auth Button */}
               {!session ? (
-                <button
-                  onClick={() => navigate('/auth')}
-                  className="px-5 py-2.5 liquid-button liquid-button-primary text-sm"
-                >
-                  Войти
-                </button>
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  {/* Support Button - icon only on mobile */}
+                  <a
+                    href="https://t.me/q4rzhas"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-green-500/50 hover:bg-green-500/20"
+                    title="Служба поддержки"
+                  >
+                    <MessageCircle className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Поддержка</span>
+                  </a>
+
+                  <button
+                    onClick={() => navigate('/auth')}
+                    className="px-3 sm:px-5 py-2 sm:py-2.5 liquid-button liquid-button-primary text-xs sm:text-sm whitespace-nowrap"
+                  >
+                    Войти
+                  </button>
+                </div>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <button
                     onClick={() => navigate('/profile')}
-                    className="px-4 py-2 liquid-button text-sm flex items-center gap-2"
+                    className="w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm flex items-center justify-center sm:gap-2"
                   >
                     <CircleUser className="w-4 h-4" />
-                    <span>Профиль</span>
+                    <span className="hidden sm:inline">Профиль</span>
                   </button>
                   <button
                     onClick={() => supabase.auth.signOut()}
-                    className="px-4 py-2 liquid-button text-sm hover:border-red-500/50 hover:bg-red-500/20 flex items-center gap-2"
+                    className="w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-red-500/50 hover:bg-red-500/20 flex items-center justify-center sm:gap-2"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Выход</span>
+                    <span className="hidden sm:inline">Выход</span>
                   </button>
                 </div>
               )}
@@ -225,7 +227,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 pt-20">
+      <main className="relative z-10">
         {!session ? (
           route === '/auth' ? (
             <Auth />
@@ -281,15 +283,15 @@ function App() {
 
       {/* Footer */}
       <footer className="relative z-10 liquid-nav mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
             <div className="flex items-center space-x-2 liquid-badge">
-              <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-              <p className="text-sm text-[var(--text-tertiary)]">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent)]" />
+              <p className="text-xs sm:text-sm text-[var(--text-tertiary)]">
                 © 2026 {texts.appTitle}. Built for excellence.
               </p>
             </div>
-            <nav className="flex flex-wrap items-center justify-center gap-4 text-sm">
+            <nav className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm">
               <button onClick={() => navigate('/about')} className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 О нас
               </button>

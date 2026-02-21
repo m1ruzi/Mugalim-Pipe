@@ -43,7 +43,7 @@ export default function Auth({ onLoggedIn }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 py-12 sm:py-20">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,16 +51,16 @@ export default function Auth({ onLoggedIn }: AuthProps) {
         className="w-full max-w-md"
       >
         {/* Card */}
-        <div className="liquid-glass p-8 sm:p-10">
+        <div className="liquid-glass p-6 sm:p-8 md:p-10">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 liquid-glass liquid-button-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Sparkles className="w-8 h-8 text-white" />
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 liquid-glass liquid-button-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-700 text-[var(--text-primary)] mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-700 text-[var(--text-primary)] mb-2">
               {isSignUp ? 'Создать аккаунт' : 'С возвращением!'}
             </h1>
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-sm sm:text-[var(--text-secondary)]">
               {isSignUp ? 'Начните анализировать свои уроки' : 'Войдите для продолжения'}
             </p>
           </div>
@@ -73,12 +73,13 @@ export default function Auth({ onLoggedIn }: AuthProps) {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)]" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="liquid-input w-full pl-12"
+                  style={{ paddingLeft: '45px' }}
+                  className="liquid-input w-full text-sm sm:text-base"
                   placeholder="you@example.com"
                   required
                 />
@@ -91,12 +92,13 @@ export default function Auth({ onLoggedIn }: AuthProps) {
                 Пароль
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)]" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="liquid-input w-full pl-12"
+                  style={{ paddingLeft: '45px' }}
+                  className="liquid-input w-full text-sm sm:text-base"
                   placeholder="••••••••"
                   required
                 />
@@ -106,8 +108,8 @@ export default function Auth({ onLoggedIn }: AuthProps) {
             {/* Message */}
             {message && (
               <div className={`text-sm p-3 rounded-lg ${
-                message.startsWith('✅') 
-                  ? 'bg-green-500/20 text-green-400' 
+                message.startsWith('✅')
+                  ? 'bg-green-500/20 text-green-400'
                   : 'bg-red-500/20 text-red-400'
               }`}>
                 {message}
@@ -118,7 +120,7 @@ export default function Auth({ onLoggedIn }: AuthProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 liquid-button liquid-button-primary font-600 text-lg disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-4 liquid-button liquid-button-primary font-600 text-base sm:text-lg disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? 'Загрузка...' : (
                 <>

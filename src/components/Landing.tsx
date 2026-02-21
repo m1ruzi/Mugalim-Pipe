@@ -19,26 +19,26 @@ export default function Landing({ onLoginClick }: LandingProps) {
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-20 relative z-10">
+      <main className="flex-1 flex items-center justify-center px-3 sm:px-4 py-12 sm:py-20 relative z-10">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-center max-w-5xl mx-auto"
+          className="text-center max-w-5xl mx-auto w-full"
         >
           {/* Badge */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <div className="liquid-badge">
-              <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-              <span className="text-xs font-700 uppercase tracking-wide text-[var(--text-primary)]">ENACTUS MARGULAN</span>
-              <Zap className="w-4 h-4 text-[var(--accent)]" />
+          <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
+            <div className="liquid-badge inline-flex">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent)]" />
+              <span className="text-[10px] sm:text-xs font-700 uppercase tracking-wide text-[var(--text-primary)]">ENACTUS MARGULAN</span>
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent)]" />
             </div>
           </motion.div>
 
           {/* Main Title */}
           <motion.h1
             variants={itemVariants}
-            className="text-7xl sm:text-8xl md:text-9xl font-800 tracking-tight mb-6 text-gradient"
+            className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-800 tracking-tight mb-4 sm:mb-6 text-gradient"
             style={{ textShadow: '0 0 80px rgba(128, 0, 32, 0.5)' }}
           >
             MugalimPipe
@@ -47,7 +47,7 @@ export default function Landing({ onLoginClick }: LandingProps) {
           {/* Subtitle */}
           <motion.h2
             variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-6xl font-700 tracking-tight text-[var(--text-primary)] mb-8"
+            className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-700 tracking-tight text-[var(--text-primary)] mb-6 sm:mb-8 px-2"
           >
             Оцените свои <span className="text-gradient">педагогические навыки</span>
           </motion.h2>
@@ -55,27 +55,27 @@ export default function Landing({ onLoginClick }: LandingProps) {
           {/* Description */}
           <motion.p
             variants={itemVariants}
-            className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-4"
           >
             Инновационная платформа с использованием AI для детального анализа ваших уроков.
             Получите персональные рекомендации для профессионального роста.
           </motion.p>
 
           {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 12px 40px rgba(255, 45, 85, 0.5)' }}
               whileTap={{ scale: 0.98 }}
               onClick={onLoginClick}
-              className="group px-8 py-4 liquid-button liquid-button-primary text-lg flex items-center gap-3"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 liquid-button liquid-button-primary text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3"
             >
               Начать анализ
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </motion.div>
 
           {/* Features */}
-          <motion.div variants={containerVariants} className="grid md:grid-cols-3 gap-6">
+          <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 px-3 sm:px-0">
             {[
               {
                 icon: Video,
@@ -100,13 +100,13 @@ export default function Landing({ onLoginClick }: LandingProps) {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className="liquid-glass p-8"
+                className="liquid-glass p-5 sm:p-8"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 mx-auto shadow-lg`}>
-                  <feature.icon className="w-8 h-8 text-white" />
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 sm:mb-6 mx-auto shadow-lg`}>
+                  <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-600 text-[var(--text-primary)] mb-3">{feature.title}</h3>
-                <p className="text-[var(--text-secondary)] leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg sm:text-xl font-600 text-[var(--text-primary)] mb-2 sm:mb-3">{feature.title}</h3>
+                <p className="text-sm sm:text-[var(--text-secondary)] leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </motion.div>

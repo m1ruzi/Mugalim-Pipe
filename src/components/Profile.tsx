@@ -109,31 +109,33 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
   const userName = session.user?.user_metadata?.user_name || session.user?.email || 'Пользователь';
 
   return (
-    <div className="w-full max-w-6xl mx-auto relative z-10 px-4 py-8">
+    <div className="w-full max-w-6xl mx-auto relative z-10 px-3 sm:px-4 py-6 sm:py-8">
       {/* Tab Navigation */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="liquid-glass p-2 mb-8"
+        className="liquid-glass p-2 mb-6 sm:mb-8"
       >
         <div className="flex gap-2">
           <button
             onClick={() => switchTab('account')}
-            className={`flex-1 liquid-button py-3 flex items-center justify-center gap-2 ${
+            className={`flex-1 liquid-button py-2.5 sm:py-3 flex items-center justify-center gap-2 text-xs sm:text-sm ${
               activeTab === 'account' ? 'liquid-button-primary' : ''
             }`}
           >
-            <User className="w-5 h-5" />
-            <span>Мой профиль</span>
+            <User className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Мой профиль</span>
+            <span className="xs:hidden">Профиль</span>
           </button>
           <button
             onClick={() => switchTab('reports')}
-            className={`flex-1 liquid-button py-3 flex items-center justify-center gap-2 ${
+            className={`flex-1 liquid-button py-2.5 sm:py-3 flex items-center justify-center gap-2 text-xs sm:text-sm ${
               activeTab === 'reports' ? 'liquid-button-primary' : ''
             }`}
           >
-            <BarChart3 className="w-5 h-5" />
-            <span>Мои отчеты</span>
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Мои отчеты</span>
+            <span className="xs:hidden">Отчеты</span>
           </button>
         </div>
       </motion.div>
@@ -144,55 +146,55 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="liquid-glass p-8"
+          className="liquid-glass p-4 sm:p-6 md:p-8"
         >
-          <h2 className="text-3xl font-700 text-[var(--text-primary)] mb-8">Твой профиль</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-700 text-[var(--text-primary)] mb-6 sm:mb-8">Твой профиль</h2>
 
-          <div className="grid gap-6">
+          <div className="grid gap-4 sm:gap-6">
             {/* User Info Card */}
-            <div className="liquid-glass p-6">
-              <div className="mb-6">
-                <label className="block text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">Никнейм</label>
-                <p className="text-xl font-600 text-[var(--text-primary)]">{userName}</p>
+            <div className="liquid-glass p-4 sm:p-6">
+              <div className="mb-4 sm:mb-6">
+                <label className="block text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">Никнейм</label>
+                <p className="text-base sm:text-xl font-600 text-[var(--text-primary)]">{userName}</p>
               </div>
 
-              <div className="mb-6">
-                <label className="block text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">ID пользователя</label>
-                <p className="text-sm text-[var(--text-tertiary)] font-mono break-all">{session.user?.id}</p>
+              <div className="mb-4 sm:mb-6">
+                <label className="block text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">ID пользователя</label>
+                <p className="text-xs sm:text-sm text-[var(--text-tertiary)] font-mono break-all">{session.user?.id}</p>
               </div>
 
               <div>
-                <label className="block text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">Email (Виртуальный)</label>
-                <p className="text-sm text-[var(--text-tertiary)]">{session.user?.email}</p>
+                <label className="block text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)] mb-2">Email (Виртуальный)</label>
+                <p className="text-xs sm:text-sm text-[var(--text-tertiary)]">{session.user?.email}</p>
               </div>
             </div>
 
             {/* Account Stats */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="liquid-glass p-6"
+                className="liquid-glass p-4 sm:p-6"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="liquid-glass w-12 h-12 rounded-xl flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-[var(--accent)]" />
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="liquid-glass w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent)]" />
                   </div>
-                  <div className="text-xs font-700 uppercase text-[var(--text-secondary)]">Всего анализов</div>
+                  <div className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Всего анализов</div>
                 </div>
-                <div className="text-4xl font-700 text-gradient">{reports.length}</div>
+                <div className="text-3xl sm:text-4xl font-700 text-gradient">{reports.length}</div>
               </motion.div>
 
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="liquid-glass p-6"
+                className="liquid-glass p-4 sm:p-6"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="liquid-glass w-12 h-12 rounded-xl flex items-center justify-center">
-                    <Award className="w-6 h-6 text-[var(--accent)]" />
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="liquid-glass w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Award className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--accent)]" />
                   </div>
-                  <div className="text-xs font-700 uppercase text-[var(--text-secondary)]">Уровень</div>
+                  <div className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Уровень</div>
                 </div>
-                <div className="text-4xl font-700 text-gradient">PRO</div>
+                <div className="text-3xl sm:text-4xl font-700 text-gradient">PRO</div>
               </motion.div>
             </div>
           </div>
@@ -202,55 +204,55 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="liquid-glass p-8"
+          className="liquid-glass p-4 sm:p-6 md:p-8"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-700 text-[var(--text-primary)]">Мои отчеты</h2>
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-700 text-[var(--text-primary)]">Мои отчеты</h2>
           </div>
 
           {error && (
-            <div className="liquid-glass p-4 mb-6 border border-red-500/30 bg-red-500/10">
-              <p className="text-red-400">❌ {error}</p>
+            <div className="liquid-glass p-3 sm:p-4 mb-4 sm:mb-6 border border-red-500/30 bg-red-500/10">
+              <p className="text-sm text-red-400">❌ {error}</p>
             </div>
           )}
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-[var(--text-secondary)]">Загрузка отчетов...</p>
+              <p className="text-sm text-[var(--text-secondary)]">Загрузка отчетов...</p>
             </div>
           ) : reports.length === 0 ? (
-            <div className="liquid-glass p-12 text-center">
-              <p className="text-xl font-600 text-[var(--text-primary)] mb-3">📭 У тебя еще нет отчетов</p>
-              <p className="text-[var(--text-secondary)] mb-6">
+            <div className="liquid-glass p-8 sm:p-12 text-center">
+              <p className="text-lg sm:text-xl font-600 text-[var(--text-primary)] mb-3">📭 У тебя еще нет отчетов</p>
+              <p className="text-sm sm:text-[var(--text-secondary)] mb-6">
                 Загрузи первое видео для анализа и получи детальный отчет!
               </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {reports.map((report) => (
                 <motion.div
                   key={report.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   whileHover={{ scale: 1.01 }}
-                  className="liquid-glass p-6"
+                  className="liquid-glass p-4 sm:p-6"
                 >
-                  <div className="flex gap-6">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                     {/* Left side - Info */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 ${
                           report.percentage >= 80 ? 'bg-gradient-to-br from-[var(--accent)] to-[var(--accent-light)]' :
                           report.percentage >= 60 ? 'bg-gradient-to-br from-[var(--accent-light)] to-[var(--orange)]' :
                           'bg-gradient-to-br from-gray-600 to-gray-700'
                         }`}>
-                          <FileText className="w-6 h-6 text-white" />
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <div>
-                          <h4 className="text-lg font-700 text-[var(--text-primary)] mb-1">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm sm:text-lg font-700 text-[var(--text-primary)] mb-1 truncate">
                             {report.title || 'Отчет без названия'}
                           </h4>
-                          <p className="text-sm text-[var(--text-secondary)]">
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
                             {new Date(report.created_at).toLocaleDateString('ru-RU', {
                               year: 'numeric', month: 'long', day: 'numeric',
                               hour: '2-digit', minute: '2-digit',
@@ -260,35 +262,35 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
                       </div>
 
                       {/* Score badges */}
-                      <div className="flex gap-3">
-                        <div className="liquid-glass px-4 py-2">
-                          <span className="text-xs font-700 uppercase text-[var(--text-secondary)]">Оценка</span>
-                          <div className={`text-xl font-700 ${
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
+                        <div className="liquid-glass px-3 sm:px-4 py-2">
+                          <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Оценка</span>
+                          <div className={`text-base sm:text-xl font-700 ${
                             report.percentage >= 80 ? 'text-[var(--accent)]' :
                             report.percentage >= 60 ? 'text-[var(--orange)]' : 'text-gray-500'
                           }`}>
                             {report.grade}
                           </div>
                         </div>
-                        <div className="liquid-glass px-4 py-2">
-                          <span className="text-xs font-700 uppercase text-[var(--text-secondary)]">Результат</span>
-                          <div className="text-xl font-700 text-gradient">{report.totalScore}/1000</div>
+                        <div className="liquid-glass px-3 sm:px-4 py-2">
+                          <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Результат</span>
+                          <div className="text-base sm:text-xl font-700 text-gradient">{report.totalScore}/1000</div>
                         </div>
-                        <div className="liquid-glass px-4 py-2">
-                          <span className="text-xs font-700 uppercase text-[var(--text-secondary)]">Процент</span>
-                          <div className="text-xl font-700 text-[var(--green)]">{report.percentage.toFixed(1)}%</div>
+                        <div className="liquid-glass px-3 sm:px-4 py-2">
+                          <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Процент</span>
+                          <div className="text-base sm:text-xl font-700 text-[var(--green)]">{report.percentage.toFixed(1)}%</div>
                         </div>
                       </div>
                     </div>
 
                     {/* Right side - Actions */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleDownload(report)}
                         disabled={downloadingId === report.id}
-                        className="liquid-button liquid-button-primary px-4 py-2 text-sm flex items-center gap-2"
+                        className="liquid-button liquid-button-primary px-3 sm:px-4 py-2 text-xs sm:text-sm flex items-center gap-2 flex-1 sm:flex-none justify-center"
                       >
                         <Download className="w-4 h-4" />
                         <span>{downloadingId === report.id ? '...' : 'Скачать'}</span>
@@ -297,7 +299,7 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
                         whileHover={{ scale: 1.05, backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleDelete(report.id, report.storage_path)}
-                        className="liquid-button px-4 py-2 text-sm flex items-center gap-2 text-red-400 hover:text-red-400"
+                        className="liquid-button px-3 sm:px-4 py-2 text-xs sm:text-sm flex items-center gap-2 flex-1 sm:flex-none justify-center text-red-400 hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span>Удалить</span>
