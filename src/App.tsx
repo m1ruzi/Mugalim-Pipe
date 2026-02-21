@@ -184,7 +184,7 @@ function App() {
               {/* Auth Button */}
               {!session ? (
                 <div className="flex items-center space-x-1.5 sm:space-x-2">
-                  {/* Support Button - icon only on mobile */}
+                  {/* Support Button */}
                   <a
                     href="https://t.me/q4rzhas"
                     target="_blank"
@@ -192,8 +192,8 @@ function App() {
                     className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-green-500/50 hover:bg-green-500/20"
                     title="Служба поддержки"
                   >
-                    <MessageCircle className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Поддержка</span>
+                    <MessageCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline sm:ml-2">Поддержка</span>
                   </a>
 
                   <button
@@ -208,17 +208,17 @@ function App() {
                 <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <button
                     onClick={() => navigate('/profile')}
-                    className="w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm flex items-center justify-center sm:gap-2"
+                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm"
                   >
-                    <CircleUser className="w-4 h-4" />
-                    <span className="hidden sm:inline">Профиль</span>
+                    <CircleUser className="w-4 h-4 sm:hidden" />
+                    <span className="hidden sm:inline sm:ml-2">Профиль</span>
                   </button>
                   <button
                     onClick={() => supabase.auth.signOut()}
-                    className="w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-red-500/50 hover:bg-red-500/20 flex items-center justify-center sm:gap-2"
+                    className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4 liquid-button text-sm hover:border-red-500/50 hover:bg-red-500/20"
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline">Выход</span>
+                    <LogOut className="w-4 h-4 sm:hidden" />
+                    <span className="hidden sm:inline sm:ml-2">Выход</span>
                   </button>
                 </div>
               )}
