@@ -62,6 +62,20 @@ body {
   input, textarea, select {
     font-size: 16px !important;
   }
+  
+  /* Fix for Safari iOS - force hardware acceleration */
+  .liquid-button {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Fix icon visibility in Safari */
+  .liquid-button svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Safe area for notched devices */
