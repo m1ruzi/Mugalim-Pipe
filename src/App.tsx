@@ -82,6 +82,7 @@ function App() {
 
       console.log('🔗 Public URL:', publicUrl);
 
+      // Сохраняем отчет в базу данных с AI отчетом
       const { error: dbError } = await supabase
         .from('reports')
         .insert([{
@@ -94,6 +95,10 @@ function App() {
           percentage: analysisResults?.percentage || 0,
           grade: analysisResults?.grade || 'N/A',
           content: analysisResults,
+          metrics: analysisResults?.metrics || {},
+          ai_report: analysisResults?.aiReport || {},
+          strengths: analysisResults?.strengths || [],
+          priority_areas: analysisResults?.priorityAreas || [],
           status: 'completed'
         }]);
 
@@ -102,7 +107,7 @@ function App() {
         throw dbError;
       }
 
-      console.log('✅ Report saved to database');
+      console.log('✅ Report saved to database with AI report');
       alert('✅ Отчет успешно сохранен!');
     } catch (error: any) {
       console.error('Error saving report:', error);

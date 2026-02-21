@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
-import { Download, FileText, Trash2, User, Award, BarChart3 } from 'lucide-react';
+import { Download, FileText, Trash2, User, Award, BarChart3, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ProfileProps {
@@ -18,6 +18,11 @@ interface Report {
   grade: string;
   created_at: string;
   user_id: string;
+  metrics?: any;
+  ai_report?: any;
+  strengths?: string[];
+  priority_areas?: string[];
+  content?: any;
 }
 
 const Profile: React.FC<ProfileProps> = ({ session }) => {
@@ -249,9 +254,17 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
                           <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="text-sm sm:text-lg font-700 text-[var(--text-primary)] mb-1 truncate">
-                            {report.title || 'Отчет без названия'}
-                          </h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm sm:text-lg font-700 text-[var(--text-primary)] truncate">
+                              {report.title || 'Отчет без названия'}
+                            </h4>
+                            {report.ai_report && Object.keys(report.ai_report).length > 0 && (
+                              <div className="liquid-badge flex-shrink-0">
+                                <Sparkles className="w-3 h-3 text-[var(--accent)]" />
+                                <span className="text-[9px] sm:text-xs font-700 uppercase">AI</span>
+                              </div>
+                            )}
+                          </div>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
                             {new Date(report.created_at).toLocaleDateString('ru-RU', {
                               year: 'numeric', month: 'long', day: 'numeric',
