@@ -38,22 +38,28 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('📂 Loading reports for user:', session.user.id);
+      
       const { data, error: loadError } = await supabase
         .from('reports')
         .select('*')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
+      console.log('📂 Loaded reports:', data);
+      console.log('📂 Load error:', loadError);
+
       if (loadError) {
         console.error('Error loading reports:', loadError);
-        setError('Ошибка при загрузке отчетов');
+        setError('Ошибка при загрузке отчетов: ' + loadError.message);
       } else {
         setReports(data || []);
         setHasLoadedReports(true);
+        console.log('✅ Reports loaded successfully:', data?.length || 0);
       }
     } catch (err) {
       console.error('Exception loading reports:', err);
-      setError('Ошибка при загрузке отчетов');
+      setError('Ошибка при загрузке отчетов: ' + (err as Error).message);
     } finally {
       setLoading(false);
     }
