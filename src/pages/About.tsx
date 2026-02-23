@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Award, Users, Target, Sparkles, Shield, Heart } from 'lucide-react';
+import { Award, Users, Target, TrendingUp, Sparkles, Shield, Heart } from 'lucide-react';
 
 export default function About() {
   const features = [
