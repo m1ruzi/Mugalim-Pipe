@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Award, Users, Target, TrendingUp, Sparkles, Shield, Zap, Heart, ArrowRight } from 'lucide-react';
+import { Award, Users, Target, Sparkles, Shield, Heart } from 'lucide-react';
 
 export default function About() {
   const features = [
@@ -27,13 +27,6 @@ export default function About() {
       description: 'Отслеживайте свой прогресс с течением времени и наблюдайте за улучшением своих навыков',
       color: 'from-purple-500 to-purple-600'
     }
-  ];
-
-  const stats = [
-    { value: '1000+', label: 'Учителей используют' },
-    { value: '95%', label: 'Довольны результатом' },
-    { value: '4.9/5', label: 'Средняя оценка' },
-    { value: '24/7', label: 'Доступно онлайн' }
   ];
 
   const team = [
@@ -86,32 +79,6 @@ export default function About() {
           >
             Инновационная платформа для анализа и улучшения педагогических навыков с использованием искусственного интеллекта
           </motion.p>
-        </div>
-      </motion.section>
-
-      {/* Stats Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="relative z-10 py-12 px-4"
-      >
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 * index, duration: 0.5 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="liquid-glass p-6 text-center"
-              >
-                <div className="text-3xl sm:text-4xl font-700 text-gradient mb-2">{stat.value}</div>
-                <div className="text-sm text-[var(--text-secondary)]">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </motion.section>
 
@@ -203,31 +170,6 @@ export default function About() {
               Мы используем современные методы шифрования данных и строго соблюдаем политику конфиденциальности. Ваши видео и персональные данные надежно защищены.
             </p>
           </div>
-        </div>
-      </motion.section>
-
-      {/* CTA Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="relative z-10 py-20 px-4"
-      >
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-700 tracking-tight text-[var(--text-primary)] mb-6">
-            Готовы начать?
-          </h2>
-          <p className="text-lg text-[var(--text-secondary)] mb-8">
-            Присоединяйтесь к тысячам учителей, которые уже улучшают свои навыки с MugalimPipe
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 12px 40px rgba(255, 45, 85, 0.5)' }}
-            whileTap={{ scale: 0.98 }}
-            className="liquid-button liquid-button-primary text-lg px-8 py-4 flex items-center gap-3 mx-auto"
-          >
-            Начать анализ бесплатно
-            <ArrowRight className="w-5 h-5" />
-          </motion.button>
         </div>
       </motion.section>
     </div>
