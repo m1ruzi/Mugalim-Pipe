@@ -216,7 +216,7 @@ function App() {
                     className="flex items-center justify-center w-10 h-10 liquid-button"
                     title="Поддержка"
                   >
-                    <MessageCircle className="w-5 h-5 text-white" />
+                    <MessageCircle className="w-5 h-5" style={{color: 'white'}} />
                   </a>
                   {/* Login Button */}
                   <button
@@ -224,7 +224,7 @@ function App() {
                     className="flex items-center justify-center w-10 h-10 liquid-button liquid-button-primary"
                     title="Войти"
                   >
-                    <CircleUser className="w-5 h-5 text-white" />
+                    <CircleUser className="w-5 h-5" style={{color: 'white'}} />
                   </button>
                 </>
               ) : (
@@ -235,7 +235,7 @@ function App() {
                     className="flex items-center justify-center w-10 h-10 liquid-button"
                     title="Профиль"
                   >
-                    <CircleUser className="w-5 h-5 text-white" />
+                    <CircleUser className="w-5 h-5" style={{color: 'white'}} />
                   </button>
                   {/* Logout Button */}
                   <button
@@ -246,7 +246,7 @@ function App() {
                     className="flex items-center justify-center w-10 h-10 liquid-button"
                     title="Выход"
                   >
-                    <LogOut className="w-5 h-5 text-white" />
+                    <LogOut className="w-5 h-5" style={{color: 'white'}} />
                   </button>
                 </>
               )}
