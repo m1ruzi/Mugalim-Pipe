@@ -207,35 +207,35 @@ function App() {
 
               {/* Not logged in */}
               {!session?.user ? (
-                <>
+                <div className="flex items-center gap-2">
                   {/* Support Button */}
                   <a
                     href="https://t.me/q4rzhas"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center w-10 h-10 liquid-button"
+                    className="nav-icon-btn"
                     title="Поддержка"
                   >
-                    <MessageCircle className="w-5 h-5" style={{color: 'white'}} />
+                    <MessageCircle strokeWidth={2} />
                   </a>
                   {/* Login Button */}
                   <button
                     onClick={() => navigate('/auth')}
-                    className="flex items-center justify-center w-10 h-10 liquid-button liquid-button-primary"
+                    className="nav-icon-btn nav-icon-btn-primary"
                     title="Войти"
                   >
-                    <CircleUser className="w-5 h-5" style={{color: 'white'}} />
+                    <CircleUser strokeWidth={2} />
                   </button>
-                </>
+                </div>
               ) : (
-                <>
+                <div className="flex items-center gap-2">
                   {/* Profile Button */}
                   <button
                     onClick={() => navigate('/profile')}
-                    className="flex items-center justify-center w-10 h-10 liquid-button"
+                    className="nav-icon-btn"
                     title="Профиль"
                   >
-                    <CircleUser className="w-5 h-5" style={{color: 'white'}} />
+                    <CircleUser strokeWidth={2} />
                   </button>
                   {/* Logout Button */}
                   <button
@@ -243,12 +243,12 @@ function App() {
                       supabase.auth.signOut();
                       setSession(null);
                     }}
-                    className="flex items-center justify-center w-10 h-10 liquid-button"
+                    className="nav-icon-btn"
                     title="Выход"
                   >
-                    <LogOut className="w-5 h-5" style={{color: 'white'}} />
+                    <LogOut strokeWidth={2} />
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>

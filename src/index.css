@@ -75,6 +75,23 @@ body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    stroke: white !important;
+    fill: none !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Nav icon buttons for mobile */
+  .nav-icon-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .nav-icon-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: white !important;
+    fill: none !important;
   }
 }
 
@@ -180,9 +197,22 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
-.liquid-button svg {
-  display: block;
-  color: inherit;
+.liquid-button svg,
+.liquid-button .lucide {
+  display: block !important;
+  fill: none !important;
+  stroke: white !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  color: white !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Override inline stroke attribute */
+.liquid-button svg[stroke="currentColor"] {
+  stroke: white !important;
 }
 
 .liquid-button:hover {
@@ -201,6 +231,69 @@ h1, h2, h3, h4, h5, h6 {
 
 .liquid-button:active {
   transform: translateY(0) scale(0.98);
+}
+
+/* Nav Icon Button */
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.nav-icon-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: white !important;
+  fill: none !important;
+  stroke-width: 2 !important;
+}
+
+.nav-icon-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.nav-icon-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.nav-icon-btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-light) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.nav-icon-btn-primary:hover {
+  background: linear-gradient(
+    135deg,
+    var(--accent-light) 0%,
+    var(--accent) 100%
+  );
+  box-shadow: 0 8px 24px var(--accent-glow);
 }
 
 .liquid-button-primary {
