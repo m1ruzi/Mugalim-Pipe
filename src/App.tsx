@@ -63,7 +63,8 @@ function App() {
 
       // Создаем безопасный путь: user_id/date_filename.pdf
       const safeFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const storagePath = `${session.user.id}/${new Date().toISOString().split('T')[0]}_${safeFileName}`;
+      const timestamp = Date.now();
+      const storagePath = `${session.user.id}/${new Date().toISOString().split('T')[0]}_${timestamp}_${safeFileName}`;
 
       // Пробуем загрузить PDF в storage (опционально)
       let publicUrl = '';

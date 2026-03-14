@@ -34,17 +34,123 @@ export class AudioExtractionService {
     // Decode to AudioBuffer to keep old API shape
     const audioContext = new AudioContext({ sampleRate: 16000 });
     const arrayBuffer = await blob.arrayBuffer();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    
+    // ✅ БАГ 3.2 ИСПРАВЛЕН: Ограничиваем длительность извлекаемого аудио
+    const MAX_DURATION_SECONDS = 300; // 5 минут максимум
+    const sampleRate = 16000;
+    const maxSamples = MAX_DURATION_SECONDS * sampleRate;
+    
+    // Декодируем аудио с ограничением
+    let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    
+    // Если аудио дольше максимума, обрезаем его
+    if (audioBuffer.length > maxSamples) {
+      console.warn(`⚠️ Audio duration (${(audioBuffer.length / sampleRate).toFixed(1)}s) exceeds maximum (${MAX_DURATION_SECONDS}s). Truncating...`);
+      
+      const offlineCtx = new OfflineAudioContext(
+        audioBuffer.numberOfChannels,
+        maxSamples,
+        sampleRate
+      );
+      
+      const source = offlineCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(offlineCtx.destination);
+      source.start(0);
+      
+      audioBuffer = await offlineCtx.startRendering();
+    }
 
-    console.log('✅ Real audio extracted');
+    console.log('✅ Real audio extracted', { duration: audioBuffer.length / sampleRate });
     return audioBuffer;
   }
-  static async extractAudioUsingFFmpeg(videoFile: File): Promise<Blob> {
-    const audioBuffer = await this.extractAudioFromVideo(videoFile);
-    return this.audioBufferToWav(audioBuffer);
+  /**
+   * ✅ БАГ 3.1 ИСПРАВЛЕН: Интеллектуальная нарезка аудио без порчи WAV-заголовков
+   * Снимает WAV-заголовок один раз ДО нарезки, затем режет сырые PCM данные
+   */
+  static async splitAudioIntoIntelligentChunks(audioBlob: Blob, chunkDuration: number = 10): Promise<Blob[]> {
+    console.log(`📊 Splitting audio into ${chunkDuration}s chunks...`);
+    
+    // Читаем WAV целиком
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const header = new Uint8Array(arrayBuffer, 0, 4);
+    
+    // Проверяем RIFF заголовок
+    const isWav = header.reduce(
+      (s, c) => s + String.fromCharCode(c), ''
+    ) === 'RIFF';
+    
+    if (!isWav) {
+      console.warn('⚠️ Not a WAV file, splitting as-is');
+      const CHUNK_SIZE = 900 * 1024; // 900 KB
+      const chunks: Blob[] = [];
+      for (let offset = 0; offset < arrayBuffer.byteLength; offset += CHUNK_SIZE) {
+        chunks.push(
+          new Blob([arrayBuffer.slice(offset, offset + CHUNK_SIZE)], { type: 'application/octet-stream' })
+        );
+      }
+      return chunks;
+    }
+    
+    // ✅ Снимаем 44-байтный WAV-заголовок
+    const rawPcm = arrayBuffer.slice(44);
+    const pcmBytes = new Uint8Array(rawPcm);
+    
+    // Рассчитываем размер одного чанка (16-бит моно, 16kHz)
+    const bytesPerSecond = 16000 * 2; // 16kHz * 2 bytes per sample
+    const chunkBytes = chunkDuration * bytesPerSecond;
+    
+    const chunks: Blob[] = [];
+    
+    for (let offset = 0; offset < rawPcm.byteLength; offset += chunkBytes) {
+      const chunkEnd = Math.min(offset + chunkBytes, rawPcm.byteLength);
+      const chunkData = pcmBytes.slice(offset, chunkEnd);
+      
+      // Каждый чанк оборачиваем в собственный WAV-заголовок
+      const chunkWithHeader = this.createWavBlob(chunkData, 16000, 1);
+      chunks.push(chunkWithHeader);
+    }
+    
+    console.log(`✅ Audio split into ${chunks.length} chunks`);
+    return chunks;
   }
 
-  static audioBufferToWav(buffer: AudioBuffer): Blob {
+  /**
+   * Создаёт WAV-blob с корректным заголовком для сырых PCM данных
+   */
+  private static createWavBlob(pcmData: Uint8Array, sampleRate: number, channels: number): Blob {
+    const bytesPerSample = 2; // 16-bit
+    const dataSize = pcmData.byteLength;
+    const arrayBuffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(arrayBuffer);
+    
+    // Запись WAV заголовка
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+    
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); // PCM format chunk size
+    view.setUint16(20, 1, true); // Audio format (1 = PCM)
+    view.setUint16(22, channels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * channels * bytesPerSample, true); // Byte rate
+    view.setUint16(32, channels * bytesPerSample, true); // Block align
+    view.setUint16(34, 16, true); // Bits per sample
+    writeString(36, 'data');
+    view.setUint32(40, dataSize, true);
+    
+    // Копируем PCM данные
+    const pcmView = new Uint8Array(arrayBuffer, 44);
+    pcmView.set(pcmData);
+    
+    return new Blob([arrayBuffer], { type: 'audio/wav' });
+  }static audioBufferToWav(buffer: AudioBuffer): Blob {
     const length = buffer.length;
     const numberOfChannels = buffer.numberOfChannels;
     const sampleRate = buffer.sampleRate;

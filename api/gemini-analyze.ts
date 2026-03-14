@@ -65,10 +65,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handleProfessionalReport(res: VercelResponse, model: any, analysisData: any, language: string) {
   try {
-    const isKazakh = language === 'kk';
     const isRussian = language === 'ru';
 
-    // Улучшенный промпт с фокусом на КОНКРЕТНЫЙ анализ речи
     const systemPrompt = isRussian ? `
 Вы профессиональный эксперт по анализу педагогического мастерства с 20-летним опытом.
 
@@ -78,71 +76,57 @@ async function handleProfessionalReport(res: VercelResponse, model: any, analysi
 - Анализируйте конкретные формулировки и термины
 - Давайте рекомендации основанные на РЕАЛЬНЫХ словах учителя
 
-НЕ ИСПОЛЬЗУЙТЕ шаблонные фразы! Каждая рекомендация должна быть основана на конкретных словах из транскрипции.
-
-ПРИМЕР ПРАВИЛЬНОГО АНАЛИЗА:
-❌ ПЛОХО: "Работать над словами-паразитами"
-✅ ХОРОШО: "Вы использовали слова-паразиты 'ну', 'короче', 'типа' 15 раз. Замените 'ну' на паузу, 'короче' на 'итак', 'типа' на 'например'"
-
-❌ ПЛОХО: "Улучшить структуру урока"
-✅ ХОРОШО: "Начало урока было хорошим ('Здравствуйте, садитесь'), но не было обозначено цели урока. Добавьте: 'Сегодня мы изучим...' после приветствия"
-
 ФОРМАТ ОТВЕТА - СТРОГО JSON:
 {
   "executiveSummary": "2-3 предложения с ОБЯЗАТЕЛЬНЫМ упоминанием конкретных моментов из речи",
   "detailedAnalysis": {
-    "strengths": ["конкретная цитата или фраза которая была хорошей + почему", "еще одна конкретная сильная сторона", "третья сильная сторона", "четвертая сильная сторона"],
-    "areasForImprovement": ["конкретная цитата проблемы + КАК исправить", "конкретная проблема + решение", "третья зона роста + рекомендация", "четвертая зона роста + совет"],
-    "keyInsights": ["инсайт основанный на анализе речи", "инсайт про стиль преподавания", "инсайт про взаимодействие"]
+    "strengths": ["конкретная цитата или фраза + почему хорошо", "еще одна сильная сторона", "третья", "четвертая"],
+    "areasForImprovement": ["конкретная проблема + КАК исправить", "вторая зона + решение", "третья", "четвертая"],
+    "keyInsights": ["инсайт из анализа речи", "инсайт про стиль", "инсайт про взаимодействие"]
   },
   "recommendations": {
-    "immediate": ["что сказать на следующем уроке вместо...", "какую фразу изменить на..."],
-    "shortTerm": ["какие упражнения делать", "какие слова заменить на..."],
-    "longTerm": ["стратегические цели", "какие фразы-клише выучить"]
+    "immediate": ["что сделать на следующем уроке", "какую фразу изменить"],
+    "shortTerm": ["упражнения", "какие слова заменить на..."],
+    "longTerm": ["стратегические цели", "какие фразы выучить"]
   },
   "actionPlan": {
-    "week1": ["конкретная задача с примером фразы", "задача 2", "задача 3"],
+    "week1": ["нақты тапсырма + мысал", "тапсырма 2", "тапсырма 3"],
     "week2": ["задача 1", "задача 2", "задача 3"],
     "week3": ["задача 1", "задача 2", "задача 3"],
     "week4": ["задача 1", "задача 2", "задача 3"]
   },
-  "motivationalMessage": "вдохновляющее сообщение с упоминанием конкретного успеха учителя",
+  "motivationalMessage": "вдохновляющее сообщение с упоминанием конкретного успеха",
   "nextSteps": ["шаг 1", "шаг 2", "шаг 3"]
 }
 ` : `
 Сіз 20 жылдық тәжірибесі бар педагогикалық шеберлікті талдау жөніндегі кәсіби сарапшысыз.
 
 МАҢЫЗДЫ: МҰҒАЛІМНІҢ НАҚТЫ СӨЙЛЕГЕН СӨЗДЕРІН ТАЛДАҢЫЗ!
-- Транскрипциядан нақты сөздерді келтіріңіз
-- Мұғалім қолданған нақты паразит сөздерді көрсетіңіз
-- Нақты сөздер мен терминдерді талдаңыз
-- Мұғалімнің НАҚТЫ сөздеріне негізделген ұсыныстар беріңіз
 
 ЖАУАП ФОРМАТЫ - ҚАТАҢ JSON:
 {
   "executiveSummary": "2-3 сөйлем, сөйлеуден нақты мысалдармен",
   "detailedAnalysis": {
-    "strengths": ["нақты жақсы сөйлем немесе сөз + неге жақсы", "екінші нақты күшті жақ", "үшінші", "төртінші"],
-    "areasForImprovement": ["нақты проблема + ҚАЛАЙ түзету", "екінші проблема + шешім", "үшінші", "төртінші"],
-    "keyInsights": ["сөйлеу талдауына негізделген инсайт", "оқыту стилі туралы инсайт", "өзара әрекеттесу туралы инсайт"]
+    "strengths": ["нақты жақсы сөйлем + неге жақсы", "екінші", "үшінші", "төртінші"],
+    "areasForImprovement": ["нақты проблема + ҚАЛАЙ түзету", "екінші + шешім", "үшінші", "төртінші"],
+    "keyInsights": ["инсайт", "стиль туралы инсайт", "өзара әрекеттесу туралы"]
   },
   "recommendations": {
-    "immediate": ["келесі сабақта не айту керек", "қай сөзді өзгерту керек"],
-    "shortTerm": ["қандай жаттығулар жасау", "қай сөздерді неге ауыстыру"],
-    "longTerm": ["стратегиялық мақсаттар", "қандай сөз тіркестерін жаттау"]
+    "immediate": ["келесі сабақта не айту керек", "қай сөзді өзгерту"],
+    "shortTerm": ["жаттығулар", "қай сөздерді ауыстыру"],
+    "longTerm": ["стратегиялық мақсаттар", "сөз тіркестерін жаттау"]
   },
   "actionPlan": {
-    "week1": ["сөз мысалымен нақты тапсырма", "тапсырма 2", "тапсырма 3"],
+    "week1": ["нақты тапсырма", "тапсырма 2", "тапсырма 3"],
     "week2": ["тапсырма 1", "тапсырма 2", "тапсырма 3"],
     "week3": ["тапсырма 1", "тапсырма 2", "тапсырма 3"],
     "week4": ["тапсырма 1", "тапсырма 2", "тапсырма 3"]
   },
-  "motivationalMessage": "мұғалімнің нақты жетістігін атап өтетін шабыттандыратын хабарлама",
+  "motivationalMessage": "шабыттандыратын хабарлама",
   "nextSteps": ["1-қадам", "2-қадам", "3-қадам"]
 }
 `;
 
-    // Извлекаем конкретные слова-паразиты из транскрипции
     const transcription = analysisData.transcription || '';
     const fillerWordsFound = findFillerWords(transcription);
     const keyPhrases = extractKeyPhrases(transcription);
@@ -164,81 +148,45 @@ ${fillerWordsFound.length > 0 ? fillerWordsFound.map(fw => `- "${fw.word}" ис�
 ${keyPhrases.length > 0 ? keyPhrases.map(kp => `- "${kp}"`).join('\n') : 'Нет данных'}
 
 АНАЛИЗ ПРИВЕТСТВИЯ:
-${greetingAnalysis.found ? `✅ Найдено: "${greetingAnalysis.text}"` : '❌ Приветствие не найдено - ДОБАВИТЬ: "Здравствуйте, садитесь!"'}
+${greetingAnalysis.found ? `✅ Найдено: "${greetingAnalysis.text}"` : '❌ Приветствие не найдено'}
 
 АНАЛИЗ ИНСТРУКЦИЙ:
-${instructionsAnalysis.hasClearInstructions ? `✅ Инструкции даны четко` : '❌ Инструкции нечеткие - ИСПОЛЬЗОВАТЬ: "Откройте учебник на странице...", "Запишите в тетрадь..."'}
+${instructionsAnalysis.hasClearInstructions ? `✅ Инструкции даны четко` : '❌ Инструкции нечеткие'}
 
 === ЧИСЛОВЫЕ МЕТРИКИ ===
 
-МЕТРИКИ ПОЗЫ И ОСАНКИ:
-- Общий балл: ${analysisData.scoringResults.metrics.posture.score}/200
-- Выравнивание позвоночника: ${analysisData.scoringResults.metrics.posture.spineAlignment}/40
-- Симметрия плеч: ${analysisData.scoringResults.metrics.posture.shoulderSymmetry}/40
-- Положение головы: ${analysisData.scoringResults.metrics.posture.headPosition}/40
-- Стабильность: ${analysisData.scoringResults.metrics.posture.stability}/40
-- Уверенность: ${analysisData.scoringResults.metrics.posture.confidence}/40
-- Проблемы: ${(analysisData.scoringResults.metrics.posture.issues || []).join(', ') || 'Не выявлено'}
-
-МЕТРИКИ ЖЕСТИКУЛЯЦИИ:
-- Общий балл: ${analysisData.scoringResults.metrics.gesticulation.score}/200
-- Разнообразие жестов: ${analysisData.scoringResults.metrics.gesticulation.variety}/40
-- Частота: ${analysisData.scoringResults.metrics.gesticulation.frequency}/40
-- Уместность: ${analysisData.scoringResults.metrics.gesticulation.appropriateness}/40
-- Выразительность: ${analysisData.scoringResults.metrics.gesticulation.expressiveness}/40
-- Координация: ${analysisData.scoringResults.metrics.gesticulation.coordination}/40
-- Типы жестов: ${(analysisData.scoringResults.metrics.gesticulation.gestures || []).join(', ') || 'Не определено'}
-
-МЕТРИКИ МИМИКИ:
-- Общий балл: ${analysisData.scoringResults.metrics.facial.score}/200
-- Выразительность: ${analysisData.scoringResults.metrics.facial.expressiveness}/40
-- Зрительный контакт: ${analysisData.scoringResults.metrics.facial.eyeContact}/40
-- Частота улыбок: ${analysisData.scoringResults.metrics.facial.smileFrequency}/40
-- Эмоциональный диапазон: ${analysisData.scoringResults.metrics.facial.emotionalRange}/40
-- Аутентичность: ${analysisData.scoringResults.metrics.facial.authenticity}/40
-
-МЕТРИКИ РЕЧИ:
-- Общий балл: ${analysisData.scoringResults.metrics.speech.score}/200
-- Ясность: ${analysisData.scoringResults.metrics.speech.clarity}/40
-- Темп: ${analysisData.scoringResults.metrics.speech.pace}/40
-- Громкость: ${analysisData.scoringResults.metrics.speech.volume}/40
-- Словарный запас: ${analysisData.scoringResults.metrics.speech.vocabulary}/40
-- Грамматика: ${analysisData.scoringResults.metrics.speech.grammar}/40
-- Слова-паразиты (из анализа): ${analysisData.scoringResults.metrics.speech.fillerWords || 0}
-- Слов в минуту: ${analysisData.audioAnalysis?.vocabulary?.speakingRate || 'Н/Д'}
-
-МЕТРИКИ ВОВЛЕЧЕННОСТИ:
-- Общий балл: ${analysisData.scoringResults.metrics.engagement.score}/200
-- Внимание: ${analysisData.scoringResults.metrics.engagement.attention}/40
-- Взаимодействие: ${analysisData.scoringResults.metrics.engagement.interaction}/40
-- Энергия: ${analysisData.scoringResults.metrics.engagement.energy}/40
-- Присутствие: ${analysisData.scoringResults.metrics.engagement.presence}/40
-- Харизма: ${analysisData.scoringResults.metrics.engagement.charisma}/40
-
-ОБЩИЙ РЕЗУЛЬТАТ:
-- Балл: ${analysisData.scoringResults.totalScore}/1000
-- Процент: ${analysisData.scoringResults.percentage.toFixed(1)}%
-- Оценка: ${analysisData.scoringResults.grade}
-
-=== ЗАДАНИЕ ДЛЯ AI ===
-ПРОАНАЛИЗИРУЙТЕ КОНКРЕТНЫЕ СЛОВА УЧИТЕЛЯ ИЗ ТРАНСКРИПЦИИ ВЫШЕ!
-ДАЙТЕ РЕКОМЕНДАЦИИ ОСНОВАННЫЕ НА РЕАЛЬНЫХ ФРАЗАХ КОТОРЫЕ ОН ИСПОЛЬЗОВАЛ!
+- Поза: ${analysisData.scoringResults.metrics.posture.score}/200
+- Жестикуляция: ${analysisData.scoringResults.metrics.gesticulation.score}/200
+- Мимика: ${analysisData.scoringResults.metrics.facial.score}/200
+- Речь: ${analysisData.scoringResults.metrics.speech.score}/200
+- Вовлеченность: ${analysisData.scoringResults.metrics.engagement.score}/200
+- Общий результат: ${analysisData.scoringResults.totalScore}/1000 (${analysisData.scoringResults.percentage.toFixed(1)}%) — ${analysisData.scoringResults.grade}
 `;
 
     const fullPrompt = systemPrompt + '\n\n' + dataSection;
 
-    console.log('🤖 Generating AI report with concrete speech analysis...');
+    console.log('🤖 Generating AI report...');
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
 
-    // Извлекаем JSON из ответа
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    let parsedResponse;
-    
+
+    let parsedResponse: any;
     if (jsonMatch) {
       try {
-        parsedResponse = JSON.parse(jsonMatch[0]);
+        const aiData = JSON.parse(jsonMatch[0]);
+        parsedResponse = {
+          professionalReport: {
+            executiveSummary: aiData.executiveSummary || '',
+            detailedAnalysis: aiData.detailedAnalysis || { strengths: [], areasForImprovement: [], keyInsights: [] },
+            recommendations: aiData.recommendations || { immediate: [], shortTerm: [], longTerm: [] },
+            actionPlan: aiData.actionPlan || { week1: [], week2: [], week3: [], week4: [] },
+          },
+          enhancedRecommendations: { posture: [], gesticulation: [], facial: [], speech: [], engagement: [] },
+          motivationalMessage: aiData.motivationalMessage || '',
+          nextSteps: aiData.nextSteps || []
+        };
       } catch (e) {
         console.error('Failed to parse JSON, using fallback');
         parsedResponse = createFallbackReport(analysisData, language, transcription, fillerWordsFound);
@@ -260,7 +208,6 @@ ${instructionsAnalysis.hasClearInstructions ? `✅ Инструкции даны
   }
 }
 
-// Функция для поиска слов-паразитов в транскрипции
 function findFillerWords(transcription: string): Array<{word: string, count: number, replacement: string}> {
   const fillerWordsMap: Record<string, string> = {
     'ну': 'пауза',
@@ -289,15 +236,11 @@ function findFillerWords(transcription: string): Array<{word: string, count: num
   return result.sort((a, b) => b.count - a.count);
 }
 
-// Функция для извлечения ключевых фраз
 function extractKeyPhrases(transcription: string): string[] {
   const phrases: string[] = [];
-  
-  // Ищем приветствия
   const greetingMatch = transcription.match(/^(здравствуйте|привет|добрый день|доброе утро)/i);
   if (greetingMatch) phrases.push(greetingMatch[0]);
 
-  // Ищем инструкции
   const instructionPatterns = [
     /откройте (учебник|тетрадь|страницу)/i,
     /запишите (в тетрадь|себе)/i,
@@ -314,7 +257,6 @@ function extractKeyPhrases(transcription: string): string[] {
   return phrases;
 }
 
-// Анализ приветствия
 function analyzeGreeting(transcription: string): {found: boolean, text: string} {
   const greetingMatch = transcription.match(/^(здравствуйте|привет|добрый день|доброе утро)[,!.\s]{0,10}([а-яё\s,]{0,30})/i);
   if (greetingMatch) {
@@ -323,7 +265,6 @@ function analyzeGreeting(transcription: string): {found: boolean, text: string} 
   return { found: false, text: '' };
 }
 
-// Анализ инструкций
 function analyzeInstructions(transcription: string): {hasClearInstructions: boolean, examples: string[]} {
   const instructionPatterns = [
     /откройте (учебник|тетрадь|страницу)/i,
@@ -345,22 +286,34 @@ function analyzeInstructions(transcription: string): {hasClearInstructions: bool
   return { hasClearInstructions, examples };
 }
 
-function createFallbackReport(analysisData: any, language: string) {
+function createFallbackReport(
+  analysisData: any,
+  language: string,
+  transcription?: string,
+  fillerWordsFound?: Array<{word: string, count: number, replacement: string}>
+) {
   const isRussian = language === 'ru';
-  
   const score = analysisData.scoringResults.totalScore;
   const percentage = analysisData.scoringResults.percentage;
-  
-  let strengths = [];
-  let areasForImprovement = [];
+
+  const fillerSummary = fillerWordsFound && fillerWordsFound.length > 0
+    ? fillerWordsFound.slice(0, 3).map(fw => `"${fw.word}" (${fw.count}x → "${fw.replacement}")`).join(', ')
+    : (isRussian ? 'не обнаружены' : 'табылмады');
+
+  const transcriptionSnippet = transcription
+    ? `"${transcription.slice(0, 80)}${transcription.length > 80 ? '...' : ''}"`
+    : '';
+
+  let strengths: string[] = [];
+  let areasForImprovement: string[] = [];
   let motivationalMessage = '';
 
   if (score >= 800) {
     strengths = isRussian ? [
-      'Отличная структура урока',
-      'Уверенная поза и осанка',
-      'Выразительная жестикуляция',
-      'Хороший зрительный контакт с аудиторией'
+      `Отличная структура урока${transcriptionSnippet ? ` — сильное начало: ${transcriptionSnippet}` : ''}`,
+      'Уверенная поза и осанка на протяжении всего урока',
+      'Выразительная жестикуляция и активный зрительный контакт',
+      'Грамотная речь с минимальными словами-паразитами'
     ] : [
       'Сабақтың тамаша құрылымы',
       'Сенімді дене бітімі',
@@ -368,110 +321,110 @@ function createFallbackReport(analysisData: any, language: string) {
       'Аудиториямен жақсы көз байланысы'
     ];
     areasForImprovement = isRussian ? [
-      'Можно добавить больше интерактивных элементов',
-      'Следить за темпом речи в ключевых моментах'
+      'Добавить больше интерактивных элементов в урок',
+      'Следить за темпом речи в ключевые моменты объяснения'
     ] : [
       'Интерактивті элементтерді көбірек қосу',
       'Негізгі сәттерде сөйлеу қарқынын бақылау'
     ];
-    motivationalMessage = isRussian 
+    motivationalMessage = isRussian
       ? 'Превосходная работа! Ваш профессионализм на высоком уровне. Продолжайте совершенствоваться!'
-      : 'Керемет жұмыс! Сіздің кәсібилігіңіз жоғары деңгейде. Жетілдіруді жалғастырыңыз!';
+      : 'Керемет жұмыс! Жетілдіруді жалғастырыңыз!';
   } else if (score >= 600) {
     strengths = isRussian ? [
       'Хорошая базовая структура урока',
-      'Стабильная поза во время урока',
-      'Использование жестов для акцентов',
-      'Достаточный зрительный контакт'
+      'Стабильная поза во время объяснений',
+      'Использование жестов для акцентирования ключевых моментов',
+      'Достаточный зрительный контакт с аудиторией'
     ] : [
       'Сабақтың жақсы негізгі құрылымы',
-      'Сабақ кезінде тұрақты дене бітімі',
-      'Екпін қою үшін ым-ишараны қолдану',
+      'Тұрақты дене бітімі',
+      'Ым-ишараны қолдану',
       'Жеткілікті көз байланысы'
     ];
     areasForImprovement = isRussian ? [
+      `Слова-паразиты: ${fillerSummary} — заменяйте осознанными паузами`,
       'Разнообразить жестикуляцию для большей выразительности',
-      'Уменьшить количество слов-паразитов',
-      'Добавить больше эмоциональной выразительности',
-      'Работать над стабильностью позы'
+      'Добавить больше эмоциональной выразительности в мимику',
+      'Работать над стабильностью позы в динамичных моментах'
     ] : [
-      'Мәнерлілік үшін ым-ишараны әртараптандыру',
-      'Паразит сөздерді азайту',
+      `Паразит сөздер: ${fillerSummary}`,
+      'Ым-ишараны әртараптандыру',
       'Эмоционалды өрнектеуді көбейту',
       'Дене бітімінің тұрақтылығымен жұмыс'
     ];
     motivationalMessage = isRussian
-      ? 'Хороший результат! У вас solid база для дальнейшего роста. Сфокусируйтесь на рекомендациях!'
-      : 'Жақсы нәтиже! Сізде одан әрі өсу үшін мықты негіз бар. Ұсыныстарға назар аударыңыз!';
+      ? 'Хороший результат! У вас solid база. Сфокусируйтесь на приоритетах!'
+      : 'Жақсы нәтиже! Ұсыныстарға назар аударыңыз!';
   } else {
     strengths = isRussian ? [
-      'Понимание материала урока',
-      'Попытки использовать жесты',
-      'Стремление к зрительному контакту'
+      `Понимание материала урока${transcriptionSnippet ? ` (видно из речи: ${transcriptionSnippet})` : ''}`,
+      'Попытки использовать жесты для объяснений',
+      'Стремление к зрительному контакту с учениками'
     ] : [
       'Сабақ материалын түсіну',
       'Ым-ишараны қолдану әрекеттері',
       'Көз байланысына ұмтылыс'
     ];
     areasForImprovement = isRussian ? [
-      'Работать над осанкой - держать спину прямо',
-      'Развивать выразительность жестов',
-      'Уменьшить слова-паразиты в речи',
-      'Добавить больше энергии и вовлеченности',
+      `Слова-паразиты: ${fillerSummary} — критически важно устранить`,
+      'Работать над осанкой — держать спину прямо',
+      'Развивать выразительность жестов и мимики',
+      'Добавить больше энергии и вовлечённости',
       'Практиковать зрительный контакт со всеми учениками'
     ] : [
-      'Дене бітімімен жұмыс - арқаны тік ұстау',
+      `Паразит сөздер: ${fillerSummary}`,
+      'Дене бітімімен жұмыс',
       'Ым-ишара мәнерлілігін дамыту',
-      'Сөйлеудегі паразит сөздерді азайту',
-      'Көбірек энергия мен белсенділік қосу',
-      'Барлық оқушылармен көз байланысын жаттығу'
+      'Энергия мен белсенділік',
+      'Барлық оқушылармен көз байланысы'
     ];
     motivationalMessage = isRussian
-      ? 'Каждый эксперт начинал с чего-то! Используйте эти рекомендации как план развития. У вас всё получится!'
-      : 'Әр сарапшы қайдан да бастаған! Бұл ұсыныстарды даму жоспары ретінде қолданыңыз. Сіз бәрін істей аласыз!';
+      ? 'Каждый эксперт когда-то начинал! Используйте эти рекомендации как план развития. У вас всё получится!'
+      : 'Барлық сарапшы қайдан да бастаған! Сіз бәрін істей аласыз!';
   }
 
   return {
     professionalReport: {
-      executiveSummary: isRussian 
-        ? `Результат ${score}/1000 (${percentage.toFixed(1)}%). ${score >= 600 ? 'Хороший уровень с потенциалом роста.' : 'Есть зоны для улучшения.'}`
-        : `Нәтиже ${score}/1000 (${percentage.toFixed(1)}%). ${score >= 600 ? 'Өсу әлеуеті бар жақсы деңгей.' : 'Жақсарту аймақтары бар.'}`,
+      executiveSummary: isRussian
+        ? `Результат анализа: ${score}/1000 (${percentage.toFixed(1)}%). ${score >= 600 ? 'Хороший уровень с потенциалом роста.' : 'Есть зоны для улучшения.'}`
+        : `Талдау нәтижесі: ${score}/1000 (${percentage.toFixed(1)}%). ${score >= 600 ? 'Жақсы деңгей.' : 'Жақсарту аймақтары бар.'}`,
       detailedAnalysis: {
         strengths,
         areasForImprovement,
         keyInsights: isRussian ? [
           'Наибольший потенциал в развитии жестикуляции',
-          'Речь требует работы над чистотой',
-          'Вовлеченность можно улучшить через энергию'
+          'Речь требует работы над чистотой и паузами',
+          'Вовлечённость можно улучшить через энергию подачи'
         ] : [
           'Ым-ишараны дамытуда үлкен әлеует',
           'Сөйлеу тазалығымен жұмыс қажет',
-          'Белсенділік арқылы қатысуды жақсартуға болады'
+          'Энергия арқылы қатысуды жақсарту'
         ]
       },
       recommendations: {
         immediate: isRussian ? [
-          'Записывать себя на видео для самоанализа',
-          'Практиковать позу у стены 5 минут в день',
-          'Следить за словами-паразитами'
+          `Записывать себя на видео и считать слова-паразиты (обнаружено: ${fillerSummary})`,
+          'Практиковать позу у стены 5 минут перед каждым уроком',
+          'Делать паузы вместо "эм", "ну", "значит"'
         ] : [
-          'Өзін-өзі талдау үшін бейнеге түсіру',
-          'Күніне 5 минут қабырға жанында дене бітімін жаттығу',
-          'Паразит сөздерді бақылау'
+          `Бейнеге жазу және паразит сөздерді санау (табылды: ${fillerSummary})`,
+          'Күніне 5 минут қабырға жанында жаттығу',
+          'Паразит сөздер орнына үзіліс жасау'
         ],
         shortTerm: isRussian ? [
-          'Курс по ораторскому мастерству',
-          'Упражнения на выразительность жестов',
-          'Практика осознанной речи'
+          'Курс по ораторскому мастерству (2-4 недели)',
+          'Ежедневные упражнения для выразительности жестов',
+          'Практика осознанной речи с записью'
         ] : [
           'Шешендік өнер курсы',
-          'Ым-ишара мәнерлілігіне жаттығулар',
+          'Ым-ишара жаттығулары',
           'Саналы сөйлеуді жаттығу'
         ],
         longTerm: isRussian ? [
           'Профессиональное развитие педагогических навыков',
-          'Участие в мастер-классах',
-          'Работа с ментором'
+          'Участие в мастер-классах и семинарах',
+          'Работа с ментором или тренером'
         ] : [
           'Педагогикалық дағдыларды кәсіби дамыту',
           'Шеберлік сыныптарына қатысу',
@@ -479,29 +432,31 @@ function createFallbackReport(analysisData: any, language: string) {
         ]
       },
       actionPlan: {
-        week1: isRussian ? ['Контроль осанки', 'Запись на видео', 'Анализ слов-паразитов'] : ['Дене бітімін бақылау', 'Бейнеге жазу', 'Паразит сөздерді талдау'],
-        week2: isRussian ? ['Упражнения для жестов', 'Практика улыбки', 'Темп речи'] : ['Ым-ишара жаттығулары', 'Күлкіні жаттығу', 'Сөйлеу қарқыны'],
-        week3: isRussian ? ['Зрительный контакт', 'Эмоциональность', 'Структура урока'] : ['Көз байланысы', 'Эмоционалдылық', 'Сабақ құрылымы'],
-        week4: isRussian ? ['Анализ прогресса', 'План развития', 'Новые цели'] : ['Прогресті талдау', 'Даму жоспары', 'Жаңа мақсаттар']
+        week1: isRussian
+          ? ['Контроль осанки + 3 записи урока на видео', 'Записать и подсчитать слова-паразиты', 'Упражнение "стенка" 5 мин/день']
+          : ['Дене бітімін бақылау + 3 бейне жазу', 'Паразит сөздерді санау', '"Қабырға" жаттығуы 5 мин/күн'],
+        week2: isRussian
+          ? ['Упражнения для жестов 10 мин/день', 'Практика улыбки и мимики перед зеркалом', 'Работа над темпом речи']
+          : ['Ым-ишара жаттығулары 10 мин/күн', 'Күлкіні жаттығу', 'Сөйлеу қарқыны'],
+        week3: isRussian
+          ? ['Зрительный контакт — "маяк" техника', 'Эмоциональность — реагировать мимикой', 'Структура урока: цель + итог']
+          : ['Көз байланысы', 'Эмоционалдылық', 'Сабақ құрылымы'],
+        week4: isRussian
+          ? ['Анализ прогресса — сравнить первое и последнее видео', 'Составить план на следующий месяц', 'Отметить достижения']
+          : ['Прогресті талдау', 'Келесі айға жоспар', 'Жетістіктерді атау']
       }
     },
     enhancedRecommendations: {
       posture: isRussian ? ['Держать спину прямо', 'Расправить плечи', 'Контролировать положение головы'] : ['Арқаны тік ұстау', 'Иықты жазу', 'Бас позициясын бақылау'],
-      gesticulation: isRussian ? ['Использовать открытые жесты', 'Избегать скрещенных рук', 'Жестикулировать естественно'] : ['Ашық ым-ишараны қолдану', 'Қолды айқастырмау', 'Табиғи ым-ишара жасау'],
-      facial: isRussian ? ['Чаще улыбаться', 'Поддерживать зрительный контакт', 'Показывать эмоции'] : ['Көбірек күлу', 'Көз байланысын ұстау', 'Эмоция көрсету'],
-      speech: isRussian ? ['Говорить четче', 'Контролировать темп', 'Уменьшать слова-паразиты'] : ['Анық сөйлеу', 'Қарқынды бақылау', 'Паразит сөздерді азайту'],
-      engagement: isRussian ? ['Добавлять энергию', 'Взаимодействовать с аудиторией', 'Показывать энтузиазм'] : ['Энергия қосу', 'Аудиториямен қарым-қатынас', 'Ынта-ықылас көрсету']
+      gesticulation: isRussian ? ['Открытые жесты к аудитории', 'Избегать скрещенных рук', 'Жестикулировать естественно'] : ['Ашық ым-ишара', 'Қолды айқастырмау', 'Табиғи қозғалыс'],
+      facial: isRussian ? ['Чаще улыбаться', 'Поддерживать зрительный контакт', 'Показывать эмоции'] : ['Күлімсіреу', 'Көз байланысы', 'Эмоция көрсету'],
+      speech: isRussian ? [`Устранить: ${fillerSummary}`, 'Контролировать темп (120-160 слов/мин)', 'Делать паузы для акцента'] : [`Жою: ${fillerSummary}`, 'Қарқынды бақылау', 'Пауза жасау'],
+      engagement: isRussian ? ['Добавлять энергию', 'Задавать риторические вопросы', 'Показывать энтузиазм'] : ['Энергия қосу', 'Риторикалық сұрақтар', 'Ынта-ықылас']
     },
     motivationalMessage,
-    nextSteps: isRussian ? [
-      'Изучить рекомендации',
-      'Составить план действий',
-      'Начать с малых шагов'
-    ] : [
-      'Ұсыныстарды зерттеу',
-      'Іс-қимыл жоспарын құру',
-      'Кішігірім қадамдардан бастау'
-    ]
+    nextSteps: isRussian
+      ? ['Изучить рекомендации и выбрать 3 главных', 'Записать первое видео сегодня', 'Начать с малых шагов каждый день']
+      : ['Ұсыныстарды зерттеу', 'Бүгін бейне жазу', 'Кішігірім қадамдардан бастау']
   };
 }
 
@@ -509,26 +464,26 @@ async function handleEnhancedRecommendations(res: VercelResponse, model: any, me
   try {
     const percentage = (metricData.currentScore / metricData.maxScore) * 100;
 
-    const prompts = {
+    const prompts: Record<string, { ru: string; kk: string }> = {
       posture: {
         ru: `Вы эксперт по телесному языку педагога. Дайте 5 конкретных рекомендаций для улучшения осанки и позы учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
         kk: `Сіз педагогтың дене тілі бойынша сарапшысыз. Мұғалімнің дене бітімін жақсарту үшін 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
       },
       gesticulation: {
         ru: `Вы эксперт по жестикуляции. Дайте 5 конкретных рекомендаций для развития выразительности жестов учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
-        kk: `Сіз ым-ишара бойынша сарапшысыз. Мұғалімнің ым-ишара мәнерлілігін дамыту үшін 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
+        kk: `Сіз ым-ишара бойынша сарапшысыз. 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
       },
       facial: {
-        ru: `Вы эксперт по мимике и зрительному контакту. Дайте 5 конкретных рекомендаций для улучшения выразительности лица учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
-        kk: `Сіз мимика және көз байланысы бойынша сарапшысыз. Мұғалімнің бет әлпетінің мәнерлілігін жақсарту үшін 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
+        ru: `Вы эксперт по мимике. Дайте 5 конкретных рекомендаций для улучшения выразительности лица учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
+        kk: `Сіз мимика бойынша сарапшысыз. 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
       },
       speech: {
-        ru: `Вы эксперт по речи и дикции. Дайте 5 конкретных рекомендаций для улучшения качества речи учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
-        kk: `Сіз сөйлеу және дикция бойынша сарапшысыз. Мұғалімнің сөйлеу сапасын жақсарту үшін 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
+        ru: `Вы эксперт по речи. Дайте 5 конкретных рекомендаций для улучшения качества речи учителя. Текущий результат: ${percentage.toFixed(0)}%.`,
+        kk: `Сіз сөйлеу бойынша сарапшысыз. 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
       },
       engagement: {
-        ru: `Вы эксперт по вовлеченности и харизме. Дайте 5 конкретных рекомендаций для развития педагогической харизмы. Текущий результат: ${percentage.toFixed(0)}%.`,
-        kk: `Сіз белсенділік және харизма бойынша сарапшысыз. Педагогикалық харизманы дамыту үшін 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
+        ru: `Вы эксперт по харизме. Дайте 5 конкретных рекомендаций для развития педагогической харизмы. Текущий результат: ${percentage.toFixed(0)}%.`,
+        kk: `Сіз харизма бойынша сарапшысыз. 5 нақты ұсыныс беріңіз. Ағымдағы нәтиже: ${percentage.toFixed(0)}%.`
       }
     };
 
@@ -539,20 +494,14 @@ async function handleEnhancedRecommendations(res: VercelResponse, model: any, me
     const text = response.text();
 
     const recommendations = text.split('\n')
-      .filter(line => line.trim().length > 10 && !line.includes('*'))
-      .map(line => line.replace(/^[\d\.\-\*]+\s*/, '').trim())
+      .filter((line: string) => line.trim().length > 10 && !line.includes('*'))
+      .map((line: string) => line.replace(/^[\d\.\-\*]+\s*/, '').trim())
       .slice(0, 7);
 
-    return createCorsResponse(res, 200, {
-      success: true,
-      result: recommendations
-    });
+    return createCorsResponse(res, 200, { success: true, result: recommendations });
   } catch (error: any) {
     console.error('Enhanced recommendations generation failed:', error);
-    return createCorsResponse(res, 500, {
-      success: false,
-      error: error.message
-    });
+    return createCorsResponse(res, 500, { success: false, error: error.message });
   }
 }
 
@@ -561,17 +510,9 @@ async function handleConnectionTest(res: VercelResponse, model: any) {
     const result = await model.generateContent("Ответьте 'OK' если вы работаете корректно.");
     const response = await result.response;
     const text = response.text();
-
-    return createCorsResponse(res, 200, {
-      success: true,
-      message: 'Gemini AI connection successful',
-      response: text.trim()
-    });
+    return createCorsResponse(res, 200, { success: true, message: 'Gemini AI connection successful', response: text.trim() });
   } catch (error: any) {
     console.error('Gemini connection test failed:', error);
-    return createCorsResponse(res, 200, {
-      success: false,
-      message: `Connection failed: ${error.message}`
-    });
+    return createCorsResponse(res, 200, { success: false, message: `Connection failed: ${error.message}` });
   }
 }

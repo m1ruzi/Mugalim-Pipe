@@ -366,10 +366,10 @@ class MediaPipeService {
     onProgress: (progress: number) => void
   ): Promise<DetailedAnalysisResult> {
     if (!this.isInitialized) {
-      throw new Error('MediaPipe services not initialized. Call initialize() first.');
+      throw new Error('MediaPipe not initialized. Call initialize() first.');
     }
 
-    console.log('🎬 Starting MediaPipe video analysis...', {
+    console.log('🎬 Starting MediaPipe video analysis with onseeked fix...', {
       poseInitialized: !!this.poseLandmarker,
       gestureInitialized: !!this.gestureRecognizer,
       faceInitialized: !!this.faceLandmarker
@@ -380,19 +380,17 @@ class MediaPipeService {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
 
-      // Enhanced video properties for better compatibility
       video.src = URL.createObjectURL(videoFile);
       video.muted = true;
       video.crossOrigin = 'anonymous';
       video.preload = 'metadata';
       video.playsInline = true;
 
-      const analysisData = {
+      const analysisData: any = {
         poseData: [] as PoseFrameData[],
         gestureData: [] as GestureFrameData[],
         faceData: [] as FaceFrameData[],
         frameCount: 0,
-        totalFrames: 0,
         videoDuration: 0,
         processingTimes: [] as number[],
         errorCount: 0,
@@ -400,21 +398,61 @@ class MediaPipeService {
       };
 
       let frameInterval = 0.2;
-      let currentTime = 0;
-      let lastProcessedTime = -1;
+      let busy = false;
+
+      // ✅ Финализация анализа
+      const finalize = () => {
+        URL.revokeObjectURL(video.src);
+        console.log('🎉 Analysis complete!', {
+          poseFrames: analysisData.poseData.length,
+          gestureFrames: analysisData.gestureData.length,
+          faceFrames: analysisData.faceData.length,
+          totalFrames: analysisData.frameCount,
+          errors: analysisData.errorCount
+        });
+        resolve(this.buildAnalysisResult(analysisData));
+      };
+
+      // ✅ onseeked гарантирует обработку каждого запрошенного кадра
+      const onSeeked = async () => {
+        if (busy) return;
+        busy = true;
+
+        // Очищаем таймаут при первой обработке кадра
+        if (analysisData.frameCount === 0) {
+          clearTimeout(timeout);
+        }
+
+        try {
+          await this.processVideoFrameEnhanced(video, canvas, ctx, analysisData);
+          onProgress(Math.min(99, (video.currentTime / video.duration) * 100));
+        } catch (e) {
+          console.warn(`Frame error at ${video.currentTime.toFixed(2)}s:`, e);
+          analysisData.errorCount++;
+        } finally {
+          busy = false;
+          const nextTime = video.currentTime + frameInterval;
+          if (nextTime < video.duration) {
+            video.currentTime = nextTime;
+          } else {
+            finalize();
+          }
+        }
+      };
+
+      video.onseeked = onSeeked;
 
       video.onloadedmetadata = () => {
         try {
           const maxWidth = 640;
           const maxHeight = 480;
-
           const aspectRatio = video.videoWidth / video.videoHeight;
 
           if (aspectRatio > maxWidth / maxHeight) {
             canvas.width = maxWidth;
-            canvas.height = maxWidth / aspectRatio;
+            canvas.height = Math.round(maxWidth / aspectRatio);
           } else {
-            canvas.width = maxHeight * aspectRatio;
+            canvas.width = Math.round(maxHeight * aspectRatio);
             canvas.height = maxHeight;
           }
 
@@ -428,71 +466,19 @@ class MediaPipeService {
             frameInterval = 0.2;
           }
 
-          analysisData.totalFrames = Math.floor(video.duration / frameInterval);
-
           console.log(`📹 Video analysis setup:`, {
             duration: video.duration,
             frameInterval,
-            totalFrames: analysisData.totalFrames,
             canvasSize: `${canvas.width}x${canvas.height}`,
             videoFile: videoFile.name,
             videoSize: (videoFile.size / 1024 / 1024).toFixed(2) + ' MB'
           });
 
+          // Запускаем цепочку seek с кадра 0
           video.currentTime = 0;
-          video.play().catch(error => {
-            console.error('Video play failed:', error);
-            reject(new Error('Failed to play video'));
-          });
-
         } catch (error) {
           console.error('Video metadata processing failed:', error);
           reject(new Error('Failed to process video metadata'));
-        }
-      };
-
-      video.ontimeupdate = async () => {
-        try {
-          if (video.currentTime >= video.duration) {
-            video.pause();
-            URL.revokeObjectURL(video.src);
-
-            console.log('🎉 Analysis complete!', {
-              poseFrames: analysisData.poseData.length,
-              gestureFrames: analysisData.gestureData.length,
-              faceFrames: analysisData.faceData.length,
-              totalFrames: analysisData.frameCount,
-              errors: analysisData.errorCount
-            });
-
-            const result = this.buildAnalysisResult(analysisData);
-            resolve(result);
-            return;
-          }
-
-          if (Math.abs(video.currentTime - currentTime) >= frameInterval &&
-              video.currentTime !== lastProcessedTime) {
-
-            currentTime = video.currentTime;
-            lastProcessedTime = video.currentTime;
-
-            try {
-              await this.processVideoFrameEnhanced(video, canvas, ctx, analysisData);
-
-              const progress = (video.currentTime / video.duration) * 100;
-              onProgress(Math.min(99, progress));
-
-            } catch (frameError) {
-              console.warn(`Frame processing error at ${video.currentTime}s:`, frameError);
-              analysisData.errorCount++;
-            }
-          }
-
-          video.currentTime += frameInterval;
-
-        } catch (error) {
-          console.error('Time update error:', error);
-          analysisData.errorCount++;
         }
       };
 
@@ -506,16 +492,13 @@ class MediaPipeService {
         reject(new Error('Video loading was aborted'));
       };
 
+      // Защитный таймаут
       const timeout = setTimeout(() => {
         if (analysisData.frameCount === 0) {
-          video.pause();
+          URL.revokeObjectURL(video.src);
           reject(new Error('Video analysis timeout - no frames processed within 90 seconds'));
         }
       }, 90000);
-
-      video.onended = () => {
-        clearTimeout(timeout);
-      };
     });
   }
 
