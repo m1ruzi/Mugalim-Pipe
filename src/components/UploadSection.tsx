@@ -3,7 +3,6 @@ import {
   Upload,
   Play,
   FileVideo,
-  Clock,
   CheckCircle,
   X,
   PersonStanding,
@@ -28,6 +27,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
   const [isUploading, setIsUploading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // ✅ БАГ 4.3 ИСПРАВЛЕН: храним ссылку на текущий Object URL,
+  // чтобы всегда иметь возможность его отозвать
+  const currentObjectUrl = useRef<string | null>(null);
+
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,7 +45,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('video/')) {
@@ -58,11 +60,19 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
   };
 
   const handleFile = (file: File) => {
+    // ✅ БАГ 4.3 ИСПРАВЛЕН: если пользователь загружает новый файл поверх старого,
+    // освобождаем предыдущий Object URL, чтобы не засорять память браузера
+    if (currentObjectUrl.current) {
+      URL.revokeObjectURL(currentObjectUrl.current);
+      currentObjectUrl.current = null;
+    }
+
     setUploadedFile(file);
     setIsUploading(true);
     setUploadProgress(0);
 
     const url = URL.createObjectURL(file);
+    currentObjectUrl.current = url; // ← запоминаем для будущего освобождения
     setVideoPreview(url);
 
     const interval = setInterval(() => {
@@ -84,8 +94,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
   };
 
   const handleRemoveFile = () => {
-    if (videoPreview) {
-      URL.revokeObjectURL(videoPreview);
+    // ✅ БАГ 4.3 ИСПРАВЛЕН: освобождаем URL при явном удалении файла
+    if (currentObjectUrl.current) {
+      URL.revokeObjectURL(currentObjectUrl.current);
+      currentObjectUrl.current = null;
     }
     setUploadedFile(null);
     setVideoPreview(null);

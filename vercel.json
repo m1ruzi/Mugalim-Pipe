@@ -2,23 +2,28 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites":[
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
-  "headers": [
+  "headers":[
     {
       "source": "/(.*)",
-      "headers": [
+      "headers":[
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
         },
         {
           "key": "Cross-Origin-Embedder-Policy",
-          "value": "require-corp"
+          "value": "credentialless"
         },
         {
           "key": "X-Frame-Options",
@@ -32,7 +37,7 @@
     },
     {
       "source": "/api/(.*)",
-      "headers": [
+      "headers":[
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
