@@ -122,6 +122,16 @@ class ScoringService {
       engagement: engagementMetrics
     };
 
+    // Считаем итоговый балл, процент и оценку ДО запроса в AI,
+    // чтобы Gemini получил реальные значения, а не нули.
+    const rawTotal = postureMetrics.score + gesticulationMetrics.score +
+                     facialMetrics.score + speechMetrics.score + engagementMetrics.score;
+    const safeTotal = Number.isFinite(rawTotal) ? Math.round(rawTotal) : 0;
+    const safePct   = Number.isFinite(safeTotal / 1000 * 100)
+                      ? Math.round((safeTotal / 1000) * 1000) / 10
+                      : 0;
+    const grade = this.calculateGrade(safePct);
+
     let aiReport;
     try {
       console.log('🤖 Generating AI-enhanced professional report...');
@@ -130,10 +140,9 @@ class ScoringService {
         videoAnalysis: { videoDuration },
         audioAnalysis: audioData,
         scoringResults: {
-          totalScore: postureMetrics.score + gesticulationMetrics.score +
-                      facialMetrics.score + speechMetrics.score + engagementMetrics.score,
-          percentage: 0,
-          grade: '',
+          totalScore: safeTotal,
+          percentage: safePct,
+          grade,
           metrics
         },
         multilingualData: audioData.transcriptionMetadata?.isMultilingual ? {
@@ -152,18 +161,11 @@ class ScoringService {
       aiReport = undefined;
     }
 
-    const rawTotal = postureMetrics.score + gesticulationMetrics.score +
-                     facialMetrics.score + speechMetrics.score + engagementMetrics.score;
-    const safeTotal = Number.isFinite(rawTotal) ? Math.round(rawTotal) : 0;
-    const safePct   = Number.isFinite(safeTotal / 1000 * 100)
-                      ? Math.round((safeTotal / 1000) * 1000) / 10
-                      : 0;
-
     return {
       totalScore: safeTotal,
       maxTotalScore: 1000,
       percentage: safePct,
-      grade: this.calculateGrade(safePct),
+      grade,
       metrics,
       overallFeedback: this.generateOverallFeedback(safePct),
       strengths: this.identifyStrengths(metrics),

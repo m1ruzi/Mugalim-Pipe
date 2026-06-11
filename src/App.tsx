@@ -104,11 +104,14 @@ function App() {
         total_score: analysisResults?.totalScore || 0,
         percentage: analysisResults?.percentage || 0,
         grade: analysisResults?.grade || 'N/A',
-        content: analysisResults || {},
         metrics: analysisResults?.metrics || {},
         ai_report: analysisResults?.aiReport || {},
         strengths: analysisResults?.strengths || [],
         priority_areas: analysisResults?.priorityAreas || [],
+        transcription: analysisResults?.metrics?.speech?.transcription || null,
+        video_duration:
+          (analysisResults as { analysisDetails?: { videoAnalysis?: { videoDuration?: number } } })
+            ?.analysisDetails?.videoAnalysis?.videoDuration ?? null,
         status: 'completed' as const
       };
 
