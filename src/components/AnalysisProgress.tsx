@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Brain, Eye, Users, MessageSquare, BarChart3, Mic, FileText, CheckCircle, Wifi, Languages, Loader2 } from 'lucide-react';
+import { Brain, Eye, Users, MessageSquare, BarChart3, Mic, FileText, Languages, Loader2 } from './icons';
 import { motion } from 'framer-motion';
 
 interface AnalysisProgressProps {
@@ -37,12 +37,12 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
   const onAnalysisComplete = onComplete;
 
   const analysisSteps = [
-    { icon: Eye, title: "Инициализация MediaPipe", description: "Загрузка моделей анализа" },
-    { icon: Users, title: "Анализ позы и движений", description: "Осанка и уверенность" },
-    { icon: MessageSquare, title: "Анализ жестов и мимики", description: "Выразительность движений" },
-    { icon: Mic, title: "Многоязычный анализ речи", description: "SpeechKit v3 + Gemini AI" },
-    { icon: FileText, title: "AI классификация контента", description: "Структура и логика урока" },
-    { icon: Brain, title: "AI расчет итогов", description: "Генерация проф. отчета" }
+    { icon: Eye, title: "Подготовка моделей", description: "Инициализация анализа" },
+    { icon: Users, title: "Поза и движения", description: "Осанка, стабильность, уверенность" },
+    { icon: MessageSquare, title: "Жесты и мимика", description: "Выразительность и контакт" },
+    { icon: Mic, title: "Анализ речи", description: "Распознавание и разбор речи" },
+    { icon: FileText, title: "Структура урока", description: "Логика и содержание" },
+    { icon: Brain, title: "Итоговая оценка", description: "Сбор отчёта по разделам" }
   ];
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
         let transcriptionInfo = 'Обработка...';
         if (audioAnalysis.transcriptionMetadata) {
           const meta = audioAnalysis.transcriptionMetadata;
-          transcriptionInfo = `AI: ${Math.round(meta.confidence * 100)}% (${meta.fillerWordsCount} зап.)`;
+          transcriptionInfo = `${Math.round(meta.confidence * 100)}% точность, ${meta.fillerWordsCount} зап.`;
         }
 
         setQualityMetrics(prev => ({ ...prev, audioQuality: transcriptionInfo }));
@@ -233,32 +233,8 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
             <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-[var(--accent)] animate-spin" />
           </div>
           <div>
-            <h3 className="text-base md:text-lg font-600 text-[var(--text-primary)]">Выполняется анализ</h3>
-            <p className="text-sm text-[var(--text-secondary)]">Google Gemini AI обрабатывает видео</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Security Indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="liquid-glass p-4 md:p-6"
-      >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="liquid-glass w-12 h-12 rounded-xl flex items-center justify-center">
-              <Wifi className="w-6 h-6 text-[var(--accent)]" />
-            </div>
-            <div>
-              <h3 className="text-base font-600 text-[var(--text-primary)]">Безопасное соединение</h3>
-              <p className="text-sm text-[var(--text-secondary)]">Yandex SpeechKit v3 + Gemini Cloud</p>
-            </div>
-          </div>
-          <div className="liquid-badge">
-            <CheckCircle className="w-4 h-4 text-[var(--accent)]" />
-            <span className="text-xs font-600 text-[var(--text-primary)]">Шифрование активно</span>
+            <h3 className="text-base md:text-lg font-600 text-[var(--text-primary)]">Идёт обработка записи</h3>
+            <p className="text-sm text-[var(--text-secondary)]">Обычно занимает 2–3 минуты</p>
           </div>
         </div>
       </motion.div>
@@ -277,7 +253,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
           </div>
           <div className="liquid-glass h-3 rounded-full overflow-hidden">
             <motion.div
-              className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full"
+              className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] h-full rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
@@ -332,7 +308,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
             <div className="text-xs font-600 uppercase tracking-wider text-[var(--text-secondary)] mb-2">{item.label}</div>
             <div className="liquid-glass h-1.5 rounded-full overflow-hidden">
               <motion.div
-                className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full"
+                className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] h-full rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${detailedProgress[item.key as keyof typeof detailedProgress]}%` }}
               />
@@ -356,7 +332,7 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
           {[
             { label: 'Видео', value: qualityMetrics.videoQuality, icon: Eye },
             { label: 'Аудио', value: qualityMetrics.audioQuality, icon: Languages },
-            { label: 'AI Точность', value: qualityMetrics.analysisQuality, icon: Brain }
+            { label: 'Качество', value: qualityMetrics.analysisQuality, icon: Brain }
           ].map((metric, index) => (
             <motion.div
               key={index}
@@ -382,23 +358,19 @@ const AnalysisProgress: React.FC<AnalysisProgressProps> = ({ file, onComplete })
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="grid md:grid-cols-4 gap-4 text-xs text-[var(--text-tertiary)] liquid-glass p-4"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-[var(--text-tertiary)] liquid-glass p-5"
       >
         <div>
-          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">MediaPipe Vision</span>
-          33 точки позы, 468 точек лица
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Видео</span>
+          Поза, жесты и мимика по точкам MediaPipe
         </div>
         <div>
-          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Speech Analysis</span>
-          Yandex SpeechKit v3 Cloud
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Речь</span>
+          Транскрипция и анализ темпа, чистоты, словаря
         </div>
         <div>
-          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Logic Engine</span>
-          Google Gemini 1.5 Pro
-        </div>
-        <div>
-          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Security</span>
-          AES-256 Encryption
+          <span className="text-[var(--text-secondary)] block mb-1 font-600 uppercase tracking-wider">Отчёт</span>
+          Итоговая оценка и рекомендации по разделам
         </div>
       </motion.div>
     </div>

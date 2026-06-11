@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from './icons';
 import { supabase } from '../supabase';
 
 interface AuthProps {
@@ -12,6 +12,7 @@ export default function Auth({ onLoggedIn }: AuthProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('error');
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -26,7 +27,8 @@ export default function Auth({ onLoggedIn }: AuthProps) {
           password,
         });
         if (error) throw error;
-        setMessage('✅ Проверьте email для подтверждения');
+        setMessageType('success');
+        setMessage('Проверьте email для подтверждения');
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -36,7 +38,8 @@ export default function Auth({ onLoggedIn }: AuthProps) {
         onLoggedIn?.();
       }
     } catch (error: any) {
-      setMessage('❌ ' + error.message);
+      setMessageType('error');
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -54,8 +57,9 @@ export default function Auth({ onLoggedIn }: AuthProps) {
         <div className="liquid-glass p-6 sm:p-8 md:p-10">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 liquid-glass liquid-button-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                 style={{ backgroundColor: 'var(--surface-3)', border: '1px solid var(--hairline)' }}>
+              <img src="/logo-book.png" alt="MugalimPipe" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-700 text-[var(--text-primary)] mb-2">
               {isSignUp ? 'Создать аккаунт' : 'С возвращением!'}
@@ -107,11 +111,11 @@ export default function Auth({ onLoggedIn }: AuthProps) {
 
             {/* Message */}
             {message && (
-              <div className={`text-sm p-3 rounded-lg ${
-                message.startsWith('✅')
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-red-500/20 text-red-400'
-              }`}>
+              <div className="text-sm p-3 rounded-lg border" style={
+                messageType === 'success'
+                  ? { backgroundColor: 'rgba(111,168,118,0.12)', borderColor: 'rgba(111,168,118,0.3)', color: 'var(--green)' }
+                  : { backgroundColor: 'rgba(184,68,85,0.12)', borderColor: 'rgba(184,68,85,0.3)', color: 'var(--accent-light)' }
+              }>
                 {message}
               </div>
             )}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
-import { Download, FileText, Trash2, User, Award, BarChart3, Sparkles } from 'lucide-react';
+import { Download, FileText, Trash2, User, Award, BarChart3, Sparkles } from './icons';
 import { motion } from 'framer-motion';
 
 interface ProfileProps {
@@ -74,7 +74,7 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
 
       if (error) {
         console.error('Error downloading file:', error);
-        alert('❌ Ошибка при скачивании файла');
+        alert('Не удалось скачать файл');
         return;
       }
 
@@ -88,7 +88,7 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error downloading report:', err);
-      alert('❌ Ошибка при скачивании отчета');
+      alert('Не удалось скачать отчёт');
     } finally {
       setDownloadingId(null);
     }
@@ -101,14 +101,14 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
       const { error } = await supabase.from('reports').delete().eq('id', reportId);
       if (error) {
         console.error('Error deleting report:', error);
-        alert('❌ Ошибка при удалении отчета');
+        alert('Не удалось удалить отчёт');
         return;
       }
       setReports(reports.filter(r => r.id !== reportId));
-      alert('✅ Отчет успешно удален');
+      alert('Отчёт удалён');
     } catch (err) {
       console.error('Error deleting report:', err);
-      alert('❌ Ошибка при удалении отчета');
+      alert('Не удалось удалить отчёт');
     }
   };
 
@@ -223,7 +223,7 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
 
           {error && (
             <div className="liquid-glass p-3 sm:p-4 mb-4 sm:mb-6 border border-red-500/30 bg-red-500/10">
-              <p className="text-sm text-red-400">❌ {error}</p>
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
@@ -233,9 +233,9 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
             </div>
           ) : reports.length === 0 ? (
             <div className="liquid-glass p-8 sm:p-12 text-center">
-              <p className="text-lg sm:text-xl font-600 text-[var(--text-primary)] mb-3">📭 У тебя еще нет отчетов</p>
+              <p className="text-lg sm:text-xl font-600 text-[var(--text-primary)] mb-3">Пока нет отчётов</p>
               <p className="text-sm sm:text-[var(--text-secondary)] mb-6">
-                Загрузи первое видео для анализа и получи детальный отчет!
+                Загрузите первую запись урока — анализ и отчёт появятся здесь.
               </p>
             </div>
           ) : (
@@ -284,10 +284,11 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
                       <div className="flex flex-wrap gap-2 sm:gap-3">
                         <div className="liquid-glass px-3 sm:px-4 py-2">
                           <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Оценка</span>
-                          <div className={`text-base sm:text-xl font-700 ${
-                            report.percentage >= 80 ? 'text-[var(--accent)]' :
-                            report.percentage >= 60 ? 'text-[var(--orange)]' : 'text-gray-500'
-                          }`}>
+                          <div className="text-base sm:text-xl font-700" style={{
+                            color: report.percentage >= 75 ? 'var(--green)'
+                              : report.percentage >= 55 ? 'var(--gold)'
+                              : 'var(--text-tertiary)'
+                          }}>
                             {report.grade}
                           </div>
                         </div>

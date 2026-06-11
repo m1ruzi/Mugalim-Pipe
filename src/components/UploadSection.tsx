@@ -8,11 +8,11 @@ import {
   PersonStanding,
   Hand,
   ScanFace,
-  Languages,
   Speech,
-  Sparkles,
+  Star,
+  FileText,
   Trash2
-} from 'lucide-react';
+} from './icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UploadSectionProps {
@@ -247,9 +247,10 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
                       <span className="text-[var(--text-secondary)]">Загрузка...</span>
                       <span className="font-600 text-[var(--accent)]">{uploadProgress}%</span>
                     </div>
-                    <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-1.5 sm:h-2 overflow-hidden">
+                    <div className="w-full rounded-full h-1.5 sm:h-2 overflow-hidden" style={{ backgroundColor: 'var(--surface-3)' }}>
                       <motion.div
-                        className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full"
+                        className="h-full rounded-full"
+                        style={{ background: 'linear-gradient(90deg, var(--accent), var(--accent-light))' }}
                         initial={{ width: 0 }}
                         animate={{ width: `${uploadProgress}%` }}
                       />
@@ -268,9 +269,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
                   { label: "Поза", icon: PersonStanding },
                   { label: "Жесты", icon: Hand },
                   { label: "Мимика", icon: ScanFace },
-                  { label: "Речь", icon: Languages },
-                  { label: "Структура", icon: Speech },
-                  { label: "AI", icon: Sparkles }
+                  { label: "Речь", icon: Speech },
+                  { label: "Вовлечённость", icon: Star },
+                  { label: "Отчёт", icon: FileText }
                 ].map((feature, index) => (
                   <motion.div
                     key={index}
@@ -294,7 +295,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(255, 45, 85, 0.4)' }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAnalyze}
                 disabled={isUploading}
@@ -302,12 +303,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileSelect }) => {
               >
                 <div className="flex items-center justify-center space-x-2">
                   <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-                  <span className="text-sm sm:text-base">Начать анализ урока</span>
+                  <span className="text-sm sm:text-base">Начать анализ</span>
                 </div>
               </motion.button>
 
-              <p className="text-center text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">
-                Powered by MediaPipe & Google Gemini AI
+              <p className="text-center text-[10px] sm:text-xs text-[var(--text-tertiary)] tracking-wide">
+                Анализ занимает 2–3 минуты
               </p>
             </motion.div>
           )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Star, Download, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Award, Sparkles } from 'lucide-react';
+import { BarChart3, Star, Download, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Award } from './icons';
 import { ComprehensiveAnalysis } from '../services/ScoringService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -137,18 +137,18 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
       
       reportElement.innerHTML = `
         <div style="text-align:center;margin-bottom:30px;">
-          <h1 style="font-size:28px;margin-bottom:10px;color:#800020;">MugalimPipe - Анализ урока</h1>
+          <h1 style="font-size:28px;margin-bottom:10px;color:#9B2D3C;">MugalimPipe - Анализ урока</h1>
           <p style="font-size:18px;color:#666;">Результаты анализа</p>
         </div>
         
         <div style="background:#f5f5f7;padding:20px;border-radius:12px;margin-bottom:30px;">
           <div style="text-align:center;margin-bottom:15px;">
-            <div style="font-size:48px;font-weight:700;color:#800020;margin-bottom:5px;">${results.totalScore}/1000</div>
+            <div style="font-size:48px;font-weight:700;color:#9B2D3C;margin-bottom:5px;">${results.totalScore}/1000</div>
             <div style="font-size:18px;color:#666;">Общий балл (${results.grade})</div>
           </div>
           <div style="display:flex;justify-content:space-around;text-align:center;">
             <div>
-              <div style="font-size:24px;font-weight:600;color:#800020;">${results.percentage.toFixed(1)}%</div>
+              <div style="font-size:24px;font-weight:600;color:#9B2D3C;">${results.percentage.toFixed(1)}%</div>
               <div style="font-size:12px;color:#999;">Процент</div>
             </div>
           </div>
@@ -156,26 +156,26 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
 
         ${hasAiReport ? `
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Резюме</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Резюме</h2>
             <p style="line-height:1.6;color:#333;">${pr.executiveSummary || 'Нет данных'}</p>
           </div>
 
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Сильные стороны</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Сильные стороны</h2>
             <ul style="line-height:1.8;color:#333;">
               ${(pr.detailedAnalysis.strengths || []).map((s: string) => `<li>${s}</li>`).join('')}
             </ul>
           </div>
 
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Зоны роста</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Зоны роста</h2>
             <ul style="line-height:1.8;color:#333;">
               ${(pr.detailedAnalysis.areasForImprovement || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
           </div>
 
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Рекомендации</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Рекомендации</h2>
             
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Немедленные действия:</h3>
             <ul style="line-height:1.6;color:#333;">
@@ -194,7 +194,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
           </div>
 
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">План действий</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">План действий</h2>
             
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Неделя 1:</h3>
             <ul style="line-height:1.6;color:#333;">
@@ -222,14 +222,14 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
           </div>
         ` : `
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Сильные стороны</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Сильные стороны</h2>
             <ul style="line-height:1.8;color:#333;">
               ${(results.strengths || ['Анализ завершен', 'Данные обрабатываются']).map(s => `<li>${s}</li>`).join('')}
             </ul>
           </div>
 
           <div style="margin-bottom:30px;">
-            <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Зоны роста</h2>
+            <h2 style="font-size:20px;color:#9B2D3C;margin-bottom:15px;border-bottom:2px solid #9B2D3C;padding-bottom:5px;">Зоны роста</h2>
             <ul style="line-height:1.8;color:#333;">
               ${(results.priorityAreas || ['Продолжать развитие', 'Работать над навыками']).map(a => `<li>${a}</li>`).join('')}
             </ul>
@@ -325,8 +325,8 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-700 tracking-tight text-[var(--text-primary)] mb-2">Результаты</h1>
         {results.aiReport && (
           <div className="liquid-badge inline-flex">
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent)]" />
-            <span className="text-[10px] sm:text-xs font-700 uppercase">AI Enhanced</span>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--gold)' }} />
+            <span className="text-[10px] sm:text-xs font-600 uppercase tracking-[0.14em] text-[var(--text-secondary)]">Отчёт ИИ</span>
           </div>
         )}
         <p className="text-sm sm:text-lg text-[var(--text-secondary)] mt-3 sm:mt-4 px-2">
@@ -345,9 +345,9 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
                 activeTab === tab ? 'liquid-button liquid-button-primary' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
-              {tab === 'overview' && '📊 Обзор'}
-              {tab === 'analytics' && '📈 Графики'}
-              {tab === 'detailed' && '📋 Детали'}
+              {tab === 'overview' && 'Обзор'}
+              {tab === 'analytics' && 'Графики'}
+              {tab === 'detailed' && 'Детали'}
             </button>
           ))}
         </div>
@@ -429,7 +429,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
                   <PolarGrid stroke="rgba(255,255,255,0.1)" />
                   <PolarAngleAxis tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 200]} tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 9 }} />
-                  <Radar name="Результат" dataKey="A" stroke="#FF2D55" strokeWidth={2} fill="#FF2D55" fillOpacity={0.5} />
+                  <Radar name="Результат" dataKey="A" stroke="#9B2D3C" strokeWidth={2} fill="#9B2D3C" fillOpacity={0.5} />
                   <Tooltip contentStyle={{ backgroundColor: 'rgba(28,28,30,0.9)', border: 'none', borderRadius: '12px', fontSize: 12 }} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -450,7 +450,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
                   <Tooltip contentStyle={{ backgroundColor: 'rgba(28,28,30,0.9)', border: 'none', borderRadius: '12px', fontSize: 12 }} />
                   <Bar dataKey="score" radius={[8, 8, 0, 0]}>
                     {barData.map((_, i) => (
-                      <Cell key={i} fill={['#800020', '#990033', '#6B0F2A', '#8B1A3A', '#7A0026'][i]} />
+                      <Cell key={i} fill={['#9B2D3C', '#D2A24C', '#6FA876', '#5E3550', '#3D5A66'][i]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -473,7 +473,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
                 </div>
               </div>
               <div className="liquid-glass h-2 sm:h-2.5 rounded-full overflow-hidden">
-                <motion.div className="bg-gradient-to-r from-[var(--accent)] to-orange-500 h-full rounded-full" initial={{ width: 0 }} animate={{ width: `${(cat.data.score / cat.data.maxScore) * 100}%` }} />
+                <motion.div className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] h-full rounded-full" initial={{ width: 0 }} animate={{ width: `${(cat.data.score / cat.data.maxScore) * 100}%` }} />
               </div>
             </motion.div>
           ))}
