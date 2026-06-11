@@ -1,7 +1,7 @@
 // src/services/AudioAnalysisService.ts
 
 import { AudioExtractionService } from './AudioExtractionService';
-import { YandexSpeechKitService, type TranscriptionResult, type YandexSpeechKitConfig } from './YandexSpeechKitService';
+import { YandexSpeechKitService, type TranscriptionResult } from './YandexSpeechKitService';
 
 // --- ИНТЕРФЕЙСЫ ---
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, BarChart3, Users, Target, TrendingUp, Brain, Sparkles, CircleUser, LogOut, MessageCircle } from 'lucide-react';
+import { CircleUser, LogOut, MessageCircle } from './components/icons';
 import UploadSection from './components/UploadSection';
 import AnalysisProgress from './components/AnalysisProgress';
 import ResultsDashboard from './components/ResultsDashboard';
@@ -9,6 +9,7 @@ import Landing from './components/Landing';
 import Profile from './components/Profile';
 import { supabase } from './supabase';
 import { languageService, type SupportedLanguage } from './services/LanguageService';
+import type { ComprehensiveAnalysis } from './services/ScoringService';
 
 // pages
 import Pricing from './pages/Pricing.tsx';
@@ -21,7 +22,7 @@ import About from './pages/About.tsx';
 function App() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'analyzing' | 'results'>('upload');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [analysisResults, setAnalysisResults] = useState(null);
+  const [analysisResults, setAnalysisResults] = useState<ComprehensiveAnalysis | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ru');
 
   // auth session state
@@ -103,11 +104,14 @@ function App() {
         total_score: analysisResults?.totalScore || 0,
         percentage: analysisResults?.percentage || 0,
         grade: analysisResults?.grade || 'N/A',
-        content: analysisResults || {},
         metrics: analysisResults?.metrics || {},
         ai_report: analysisResults?.aiReport || {},
         strengths: analysisResults?.strengths || [],
         priority_areas: analysisResults?.priorityAreas || [],
+        transcription: analysisResults?.metrics?.speech?.transcription || null,
+        video_duration:
+          (analysisResults as { analysisDetails?: { videoAnalysis?: { videoDuration?: number } } })
+            ?.analysisDetails?.videoAnalysis?.videoDuration ?? null,
         status: 'completed' as const
       };
 
@@ -126,12 +130,12 @@ function App() {
       }
 
       console.log('✅ Report saved to database:', dbData);
-      alert('✅ Отчет успешно сохранен!');
+      alert('Отчёт сохранён');
     } catch (error: any) {
       console.error('❌ Error saving report:', error);
       const errorMessage = error.message || 'Неизвестная ошибка';
       const errorDetails = error.details || error.hint || '';
-      alert('❌ Ошибка: ' + errorMessage + (errorDetails ? '\n' + errorDetails : ''));
+      alert('Ошибка: ' + errorMessage + (errorDetails ? '\n' + errorDetails : ''));
     }
   };
 
@@ -162,13 +166,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black relative">
-      {/* Animated Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#1a0a0f] to-[#0f0507]"></div>
-        {/* Animated glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--purple)]/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+    <div className="min-h-screen relative" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      {/* Background — тихий тёплый градиент без «орбов» */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 80% at 50% -10%, rgba(155,45,60,0.10), transparent 60%), var(--bg-primary)' }}></div>
       </div>
 
       {/* Content */}
@@ -315,12 +316,9 @@ function App() {
       <footer className="relative z-10 liquid-nav mt-20">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="flex flex-col items-center gap-4 sm:gap-6">
-            <div className="flex items-center space-x-2 liquid-badge">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent)]" />
-              <p className="text-xs sm:text-sm text-[var(--text-tertiary)]">
-                © 2026 {texts.appTitle}. Built for excellence.
-              </p>
-            </div>
+            <p className="text-xs sm:text-sm text-[var(--text-tertiary)]">
+              © 2026 {texts.appTitle}
+            </p>
             <nav className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm">
               <button onClick={() => navigate('/about')} className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 О нас

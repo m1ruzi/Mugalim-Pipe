@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Award, Users, Target, TrendingUp, Sparkles, Shield, Heart } from 'lucide-react';
+import { Users, Target, TrendingUp, Sparkles, Shield, Heart } from '../components/icons';
 
 export default function About() {
   const features = [
@@ -7,7 +7,7 @@ export default function About() {
       icon: Sparkles,
       title: 'AI Анализ',
       description: 'Используем передовые модели искусственного интеллекта для детального анализа ваших педагогических навыков',
-      color: 'from-[var(--accent)] to-orange-500'
+      color: 'from-[var(--accent)] to-[var(--gold)]'
     },
     {
       icon: Target,
@@ -38,10 +38,8 @@ export default function About() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-[#1a1a2e] to-[#0f0f1a]"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 80% at 50% -10%, rgba(155,45,60,0.10), transparent 60%), var(--bg-primary)' }}></div>
       </div>
 
       {/* Hero Section */}

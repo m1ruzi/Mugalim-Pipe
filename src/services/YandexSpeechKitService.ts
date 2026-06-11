@@ -5,6 +5,8 @@ export interface YandexSpeechKitConfig {
   format?: 'lpcm' | 'oggopus' | 'mp3';
   sampleRateHertz?: number;
   includeFillerWords?: boolean;
+  literatureText?: boolean;
+  rawResults?: boolean;
 }
 
 export interface YandexSpeechKitV3Response {
@@ -264,7 +266,7 @@ class YandexSpeechKitService {
       }
 
       // Split audio into overlapping chunks for better language detection
-      const chunks = await this.splitAudioIntoIntelligentChunks(audioBlob, 30); // 30-second chunks
+      const chunks = await this.splitAudioIntoIntelligentChunks(audioBlob);
       
       let combinedResult: TranscriptionResult = {
         text: '',
@@ -611,10 +613,9 @@ class YandexSpeechKitService {
   /**
    * Splits audio into intelligent chunks with overlap for better language detection
    */
-  private async splitAudioIntoIntelligentChunks(audioBlob: Blob, chunkDurationSeconds: number): Promise<Blob[]> {
+  private async splitAudioIntoIntelligentChunks(audioBlob: Blob): Promise<Blob[]> {
     // This is a simplified implementation
     // In a real application, you'd want to use proper audio processing with silence detection
-    const overlapSeconds = 2; // 2-second overlap between chunks
     const chunkSize = Math.floor(audioBlob.size / Math.ceil(audioBlob.size / (1024 * 1024))); // Approximate 1MB chunks
     const chunks: Blob[] = [];
     
@@ -625,111 +626,6 @@ class YandexSpeechKitService {
     }
     
     return chunks;
-  }
-
-  /**
-   * Estimates audio duration from blob
-   */
-  private async getAudioDuration(audioBlob: Blob): Promise<number> {
-    return new Promise((resolve) => {
-      const audio = new Audio();
-      audio.onloadedmetadata = () => {
-        resolve(audio.duration || 60); // Default to 60s if can't determine
-      };
-      audio.onerror = () => {
-        resolve(60); // Default to 60s on error
-      };
-      audio.src = URL.createObjectURL(audioBlob);
-    });
-  }
-
-  /**
-   * Processes the Yandex SpeechKit v3 API response with enhanced filler words detection
-   */
-  private processV3ResponseWithFillerWords(response: YandexSpeechKitV3Response): TranscriptionResult {
-    if (!response.result || !response.result.alternatives || response.result.alternatives.length === 0) {
-      return {
-        text: '',
-        confidence: 0,
-        words: [],
-        duration: 0,
-        detectedLanguages: [],
-        fillerWordsAnalysis: {
-          totalFillerWords: 0,
-          fillerWordsRatio: 0,
-          commonFillers: [],
-          fillerWordsByLanguage: {}
-        }
-      };
-    }
-
-    const bestAlternative = response.result.alternatives[0];
-    
-    // Process words with timing information and filler word detection
-    const words = bestAlternative.words?.map(word => {
-      const processedWord = {
-        word: word.word,
-        startTime: this.parseTimeString(word.startTime),
-        endTime: this.parseTimeString(word.endTime),
-        confidence: word.confidence,
-        isFillerWord: false,
-        wordType: 'word' as 'word' | 'filler' | 'pause' | 'noise'
-      };
-
-      // Analyze for filler words
-      const languageCode = response.result.languageCode || 'ru-RU';
-      const fillerInfo = this.analyzeWordForFiller(word.word, languageCode);
-      
-      if (fillerInfo.isFiller) {
-        processedWord.isFillerWord = true;
-        processedWord.wordType = fillerInfo.type;
-      }
-
-      return processedWord;
-    }) || [];
-
-    // Calculate duration from words
-    const duration = words.length > 0 
-      ? Math.max(...words.map(w => w.endTime))
-      : 0;
-
-    // Process detected languages if available
-    const detectedLanguages = bestAlternative.languages?.map(lang => ({
-      languageCode: lang.languageCode,
-      probability: lang.probability,
-      text: bestAlternative.text
-    })) || [];
-
-    // Analyze filler words
-    const fillerWords = words
-      .filter(w => w.isFillerWord)
-      .map(w => ({
-        word: w.word,
-        timestamp: w.startTime,
-        language: response.result.languageCode || 'ru-RU'
-      }));
-
-    const fillerWordsAnalysis = this.analyzeFillerWords(fillerWords, words.length);
-
-    return {
-      text: bestAlternative.text,
-      confidence: bestAlternative.confidence,
-      words,
-      duration,
-      detectedLanguages,
-      fillerWordsAnalysis
-    };
-  }
-
-  /**
-   * Parses time string from Yandex format to seconds
-   */
-  private parseTimeString(timeStr: string): number {
-    if (!timeStr) return 0;
-    
-    // Yandex returns time in format like "1.234s"
-    const match = timeStr.match(/^(\d+(?:\.\d+)?)s?$/);
-    return match ? parseFloat(match[1]) : 0;
   }
 
   /**

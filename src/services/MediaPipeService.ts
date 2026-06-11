@@ -1,9 +1,8 @@
-import { 
-  FilesetResolver, 
-  PoseLandmarker, 
+import {
+  FilesetResolver,
+  PoseLandmarker,
   GestureRecognizer,
-  FaceLandmarker,
-  DrawingUtils
+  FaceLandmarker
 } from '@mediapipe/tasks-vision';
 
 export interface DetailedAnalysisResult {
@@ -81,7 +80,6 @@ class MediaPipeService {
   private vision: any = null;
   private isInitialized = false;
   private initializationStatus: MediaPipeInitializationStatus;
-  private drawingUtils: DrawingUtils | null = null;
 
   // Enhanced configuration constants with fallbacks
   private readonly WASM_PATHS = [
@@ -187,16 +185,6 @@ class MediaPipeService {
         this.initializeGestureRecognizer(),
         this.initializeFaceLandmarker()
       ]);
-
-      // Step 3: Initialize drawing utils if any component succeeded
-      if (this.poseLandmarker || this.gestureRecognizer || this.faceLandmarker) {
-        try {
-          this.drawingUtils = new DrawingUtils();
-          console.log('✅ Drawing utilities initialized');
-        } catch (error) {
-          console.warn('⚠️ Drawing utilities initialization failed:', error);
-        }
-      }
 
       // Step 4: Determine overall initialization status
       this.initializationStatus.overall = 
@@ -584,7 +572,7 @@ class MediaPipeService {
       return results.landmarks && results.landmarks.length > 0 ? results : null;
     } catch (error) {
       // Suppress specific MediaPipe warnings
-      if (!error.toString().includes('landmark_projection_calculator')) {
+      if (!String(error).includes('landmark_projection_calculator')) {
         console.warn('Pose detection error:', error);
       }
       return null;
@@ -602,7 +590,7 @@ class MediaPipeService {
              (results.landmarks && results.landmarks.length > 0) ? results : null;
     } catch (error) {
       // Suppress specific MediaPipe warnings
-      if (!error.toString().includes('inference_feedback_manager')) {
+      if (!String(error).includes('inference_feedback_manager')) {
         console.warn('Gesture recognition error:', error);
       }
       return null;
@@ -619,7 +607,7 @@ class MediaPipeService {
       return results.faceLandmarks && results.faceLandmarks.length > 0 ? results : null;
     } catch (error) {
       // Suppress specific MediaPipe warnings
-      if (!error.toString().includes('landmark_projection_calculator')) {
+      if (!String(error).includes('landmark_projection_calculator')) {
         console.warn('Face detection error:', error);
       }
       return null;
@@ -908,7 +896,6 @@ class MediaPipeService {
       console.warn('⚠️ Error disposing Face Landmarker:', error);
     }
 
-    this.drawingUtils = null;
     this.vision = null;
     this.isInitialized = false;
     

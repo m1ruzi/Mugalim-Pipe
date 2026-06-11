@@ -4,31 +4,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   ДИЗАЙН-СИСТЕМА — «Академический премиум»
+   Тёплый чернильный фон · благородный бордо · золотой акцент.
+   ============================================================ */
 :root {
-  /* Liquid Glass Theme - Burgundy Colors */
-  --bg-primary: #000000;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-bg-light: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-border-light: rgba(255, 255, 255, 0.25);
-  --glass-shadow: rgba(0, 0, 0, 0.4);
-  --glass-highlight: rgba(255, 255, 255, 0.3);
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.6);
-  --text-tertiary: rgba(255, 255, 255, 0.4);
-  --accent: #800020;
-  --accent-light: #990033;
-  --accent-dark: #66001A;
-  --accent-glow: rgba(128, 0, 32, 0.5);
-  --blue: #8B1A3A;
-  --blue-glow: rgba(139, 26, 58, 0.5);
-  --green: #6B0F2A;
-  --orange: #990033;
-  --purple: #7A0026;
-}
+  /* Фон и поверхности (тёплый, не чистый чёрный) */
+  --bg-primary: #0C0B0D;
+  --surface-1: #151317;
+  --surface-2: #1C191F;
+  --surface-3: #241F27;
 
-* {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Линии/границы — волосяные */
+  --hairline: rgba(255, 255, 255, 0.08);
+  --hairline-strong: rgba(255, 255, 255, 0.14);
+
+  /* Текст — тёплый off-white */
+  --text-primary: #F3EFEA;
+  --text-secondary: rgba(243, 239, 234, 0.62);
+  --text-tertiary: rgba(243, 239, 234, 0.40);
+
+  /* Бренд — бордо */
+  --accent: #9B2D3C;
+  --accent-light: #B84455;
+  --accent-dark: #74212D;
+  --accent-glow: rgba(155, 45, 60, 0.30);
+
+  /* Золотой акцент — для ключевых чисел и выделений */
+  --gold: #D2A24C;
+  --gold-light: #E6C079;
+
+  /* Семантика оценок */
+  --green: #6FA876;   /* хорошо */
+  --orange: #D2A24C;  /* средне (золото) */
+  --purple: #5E3550;  /* доп. оттенок для графиков/градиентов */
+  --blue: #3D5A66;    /* доп. холодный оттенок */
+  --blue-glow: rgba(61, 90, 102, 0.30);
+
+  /* Совместимость со старыми переменными */
+  --glass-bg: var(--surface-2);
+  --glass-bg-light: var(--surface-3);
+  --glass-border: var(--hairline);
+  --glass-border-light: var(--hairline-strong);
+
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-lg: 22px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html, body {
@@ -38,498 +60,226 @@ html, body {
 }
 
 body {
-  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  background-color: #000000;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.011em;
 }
 
-/* Mobile optimizations */
+/* Точечные переходы вместо тяжёлого `* { transition: all }` */
+a, button, input, textarea, select,
+.liquid-glass, .liquid-button, .nav-icon-btn, .liquid-badge, .liquid-input {
+  transition: background-color 0.22s var(--ease), border-color 0.22s var(--ease),
+              color 0.22s var(--ease), box-shadow 0.22s var(--ease),
+              transform 0.22s var(--ease), opacity 0.22s var(--ease);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.028em;
+}
+
+/* Mobile */
 @media (max-width: 640px) {
-  html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  
-  body {
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* Prevent zoom on input focus */
-  input, textarea, select {
-    font-size: 16px !important;
-  }
-  
-  /* Fix for Safari iOS - force hardware acceleration */
-  .liquid-button {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    will-change: transform;
-  }
-  
-  /* Fix icon visibility in Safari */
-  .liquid-button svg {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    stroke: white !important;
-    fill: none !important;
-    width: 20px !important;
-    height: 20px !important;
-  }
-
-  /* Nav icon buttons for mobile */
-  .nav-icon-btn {
-    width: 40px !important;
-    height: 40px !important;
-  }
-
-  .nav-icon-btn svg {
-    width: 20px !important;
-    height: 20px !important;
-    stroke: white !important;
-    fill: none !important;
-  }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body { -webkit-tap-highlight-color: transparent; }
+  input, textarea, select { font-size: 16px !important; }
 }
 
-/* Safe area for notched devices */
 @supports (padding: max(0px)) {
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
-  
-  .fixed {
-    left: env(safe-area-inset-left);
-    right: env(safe-area-inset-right);
-  }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-/* ============================================
-   LIQUID GLASS EFFECTS
-   ============================================ */
-
-/* Main Glass Card */
+/* ============================================================
+   ПОВЕРХНОСТИ / КАРТОЧКИ
+   ============================================================ */
 .liquid-glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset,
+              0 12px 30px -18px rgba(0, 0, 0, 0.7);
   position: relative;
-  overflow: hidden;
 }
 
-.liquid-glass::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s ease;
+.liquid-glass:hover {
+  border-color: var(--hairline-strong);
 }
 
-.liquid-glass:hover::before {
-  left: 100%;
-}
+.glass-card-sm { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-sm); padding: 16px; }
+.glass-card-md { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 24px; }
+.glass-card-lg { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 32px; }
 
-.liquid-glass::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.05) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-}
-
-/* Glass Button */
-.liquid-button {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+/* ============================================================
+   КНОПКИ
+   ============================================================ */
+.liquid-button,
+.glass-button {
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-weight: 600;
-  padding: 14px 28px;
+  padding: 13px 26px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.liquid-button:hover,
+.glass-button:hover {
+  background: var(--surface-3);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.liquid-button:active,
+.glass-button:active { transform: translateY(0); }
+
 .liquid-button svg,
-.liquid-button .lucide {
-  display: block !important;
-  fill: none !important;
-  stroke: white !important;
-  stroke-width: 2 !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-  color: white !important;
-  width: 20px !important;
-  height: 20px !important;
+.glass-button svg,
+.nav-icon-btn svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
-/* Override inline stroke attribute */
-.liquid-button svg[stroke="currentColor"] {
-  stroke: white !important;
+.liquid-button-primary,
+.glass-button-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent-light);
+  color: #fff;
+  box-shadow: 0 10px 26px -12px var(--accent-glow);
 }
 
-.liquid-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px var(--accent-glow);
+.liquid-button-primary:hover,
+.glass-button-primary:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-light);
 }
 
-.liquid-button:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* Nav Icon Button */
+/* Иконочные кнопки навигации */
 .nav-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.nav-icon-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: white !important;
-  fill: none !important;
-  stroke-width: 2 !important;
 }
 
 .nav-icon-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-.nav-icon-btn:active {
-  transform: translateY(0) scale(0.98);
+  background: var(--surface-3);
+  border-color: var(--hairline-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
 }
 
 .nav-icon-btn-primary {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0%,
-    var(--accent-light) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  background: var(--accent);
+  border-color: var(--accent-light);
+  color: #fff;
 }
 
 .nav-icon-btn-primary:hover {
-  background: linear-gradient(
-    135deg,
-    var(--accent-light) 0%,
-    var(--accent) 100%
-  );
-  box-shadow: 0 8px 24px var(--accent-glow);
+  background: var(--accent-light);
+  color: #fff;
 }
 
-.liquid-button-primary {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0%,
-    var(--accent-light) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 4px 16px var(--accent-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.liquid-button-primary:hover {
-  background: linear-gradient(
-    135deg,
-    var(--accent-light) 0%,
-    var(--accent) 100%
-  );
-  box-shadow: 
-    0 12px 32px var(--accent-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-/* Glass Input */
+/* ============================================================
+   ВВОД
+   ============================================================ */
 .liquid-input {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
-  padding: 16px 20px;
+  padding: 14px 18px;
   font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
 }
+
+.liquid-input::placeholder { color: var(--text-tertiary); }
 
 .liquid-input:focus {
   outline: none;
-  border-color: var(--accent);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  box-shadow: 
-    0 0 0 3px var(--accent-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-/* Glass Nav */
+/* ============================================================
+   НАВИГАЦИЯ (лёгкое стекло сверху)
+   ============================================================ */
 .liquid-nav {
-  background: linear-gradient(
-    135deg,
-    rgba(28, 28, 30, 0.7) 0%,
-    rgba(28, 28, 30, 0.4) 100%
-  );
-  backdrop-filter: blur(50px) saturate(180%);
-  -webkit-backdrop-filter: blur(50px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  background: rgba(12, 11, 13, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid var(--hairline);
 }
 
-/* Glass Badge */
+/* ============================================================
+   ПЛАШКА / BADGE
+   ============================================================ */
 .liquid-badge {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
   border-radius: 9999px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-size: 12px;
 }
 
-/* ============================================
-   TEXT GRADIENTS
-   ============================================ */
-
+/* ============================================================
+   АКЦЕНТНЫЙ ТЕКСТ
+   ============================================================ */
 .text-gradient {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  background: linear-gradient(100deg, var(--gold-light) 0%, var(--gold) 45%, var(--accent-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.text-gradient-blue {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+.text-gradient-blue,
 .text-gradient-green {
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  background: linear-gradient(100deg, var(--gold) 0%, var(--accent-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ============================================
-   GLOW EFFECTS
-   ============================================ */
+/* Мягкое золотое свечение под ключевыми элементами (сдержанно) */
+.glow { box-shadow: 0 16px 50px -28px var(--accent-glow); }
+.glow-text { text-shadow: none; }
 
-.glow {
-  box-shadow: 0 0 40px var(--accent-glow);
-}
+/* ============================================================
+   АНИМАЦИИ (минимум)
+   ============================================================ */
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.animate-float { animation: float 4s ease-in-out infinite; }
 
-.glow-blue {
-  box-shadow: 0 0 40px var(--blue-glow);
-}
-
-.glow-text {
-  text-shadow: 0 0 40px var(--accent-glow);
-}
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 1; box-shadow: 0 0 40px var(--accent-glow); }
-  50% { opacity: 0.5; box-shadow: 0 0 20px var(--accent-glow); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.1) 50%,
-    rgba(255,255,255,0) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
-
-@keyframes liquid-flow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.liquid-orb {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    var(--accent) 0%,
-    transparent 70%
-  );
-  filter: blur(40px);
-  opacity: 0.3;
-  animation: liquid-flow 20s linear infinite;
-}
-
-/* ============================================
-   SCROLLBAR
-   ============================================ */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-}
-
+/* ============================================================
+   SCROLLBAR / SELECTION
+   ============================================================ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  border: 3px solid var(--bg-primary);
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* ============================================
-   SELECTION
-   ============================================ */
-
-::selection {
-  background: var(--accent);
-  color: white;
-}
-
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
-
-.glass-card-sm {
-  @apply liquid-glass;
-  border-radius: 16px;
-  padding: 16px;
-}
-
-.glass-card-md {
-  @apply liquid-glass;
-  border-radius: 20px;
-  padding: 24px;
-}
-
-.glass-card-lg {
-  @apply liquid-glass;
-  border-radius: 28px;
-  padding: 32px;
-}
+::selection { background: var(--accent); color: #fff; }
