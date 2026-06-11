@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "esbuild test/run-tests.ts --bundle --platform=node --format=esm --outfile=test/.dist/run.mjs --alias:@google/generative-ai=./test/mocks/generative-ai.ts --alias:axios=./test/mocks/axios.ts && node test/.dist/run.mjs"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
