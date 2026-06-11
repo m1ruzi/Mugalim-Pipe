@@ -103,6 +103,44 @@ export function makeGestureData(frames = 80): any[] {
   return data;
 }
 
+// Детерминированные кадры позы с управляемым наклоном корпуса и высотой головы
+// (без случайного шума — для стабильного сравнения «хорошо vs плохо»).
+export function makePoseFrames(opts: { leanOffset?: number; headUp?: number; frames?: number } = {}): any[] {
+  const { leanOffset = 0, headUp = 0.18, frames = 60 } = opts;
+  const shoulderY = 0.4;
+  const data: any[] = [];
+  for (let i = 0; i < frames; i++) {
+    const lm = new Array(33).fill(null).map(() => ({ x: 0.5, y: 0.5, z: 0, visibility: 0.9 }));
+    lm[0]  = { x: 0.5, y: shoulderY - headUp, z: 0, visibility: 0.95 };          // нос (выше плеч на headUp)
+    lm[11] = { x: 0.4, y: shoulderY, z: 0, visibility: 0.95 };                    // левое плечо
+    lm[12] = { x: 0.6, y: shoulderY, z: 0, visibility: 0.95 };                    // правое плечо
+    lm[23] = { x: 0.42 - leanOffset, y: 0.7, z: 0, visibility: 0.9 };             // бёдра смещены → наклон корпуса
+    lm[24] = { x: 0.58 - leanOffset, y: 0.7, z: 0, visibility: 0.9 };
+    data.push({ timestamp: i * 1000, landmarks: lm, worldLandmarks: lm, confidence: 0.9 });
+  }
+  return data;
+}
+
+// Кадры жестов одного типа (для проверки «открытый жест vs кулак»).
+export function makeGesturesOf(category: string, frames = 40): any[] {
+  const data: any[] = [];
+  for (let i = 0; i < frames; i++) {
+    data.push({ timestamp: i * 1.5, gestures: [[{ categoryName: category, score: 0.9 }]], handedness: [], landmarks: [], handCount: 1 });
+  }
+  return data;
+}
+
+// audioData с заданной расшифровкой (для проверки «связная речь vs поток»).
+export function audioDataWithText(text: string) {
+  const w = text.split(/\s+/).filter(Boolean);
+  return {
+    transcription: text,
+    vocabulary: { wordCount: w.length, uniqueWordCount: new Set(w.map(x => x.toLowerCase())).size, speakingRate: 140, fillerWords: 0, fillerWordsRatio: 0 },
+    characteristics: { rms: 0.12, duration: 120 },
+    transcriptionMetadata: { source: 'yandex' as const, confidence: 0.9, detectedLanguages: [], isMultilingual: false, languageSwitches: 0, fillerWordsDetected: false, fillerWordsCount: 0 }
+  };
+}
+
 export function makeFaceData(frames = 120): any[] {
   const data: any[] = [];
   for (let i = 0; i < frames; i++) {

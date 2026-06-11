@@ -1,5 +1,6 @@
 import { geminiAIService, type GeminiAnalysisRequest } from './GeminiAIService';
 import { languageService } from './LanguageService';
+import { SCORING_CONFIG as CFG, COMPONENT_MAX, clamp01 } from './ScoringConfig';
 
 export interface DetailedMetrics {
   posture: PostureMetrics;
@@ -274,10 +275,12 @@ class ScoringService {
       };
     }
 
-    let spineAlignmentScore = 0, shoulderSymmetryScore = 0, headPositionScore = 0,
-        stabilityScore = 0, confidenceScore = 0;
+    const C = CFG.posture;
     const issues: string[] = [];
-    let forwardLeanCount = 0, shoulderAsymmetryCount = 0, headTiltCount = 0, movementVariance = 0;
+    // Счётчики «плохих» кадров + накопители для усреднения.
+    let leanCount = 0, shoulderAsymmetryCount = 0, headOffCount = 0;
+    let movementSum = 0, movementFrames = 0;
+    let headUpSum = 0, validFrames = 0;
 
     poseData.forEach((frame, index) => {
       if (!frame?.landmarks || !Array.isArray(frame.landmarks) || frame.landmarks.length < 25) return;
@@ -287,43 +290,59 @@ class ScoringService {
 
       if (!nose || !leftShoulder || !rightShoulder || !leftHip || !rightHip) return;
       if (typeof nose.x !== 'number' || typeof leftShoulder.x !== 'number' ||
-          typeof rightShoulder.x !== 'number') return;
+          typeof rightShoulder.x !== 'number' ||
+          typeof leftHip.x !== 'number' || typeof rightHip.x !== 'number') return;
 
       const shoulderCenter = {
         x: (leftShoulder.x + rightShoulder.x) / 2,
         y: (leftShoulder.y + rightShoulder.y) / 2
       };
+      const hipCenter = {
+        x: (leftHip.x + rightHip.x) / 2,
+        y: (leftHip.y + rightHip.y) / 2
+      };
+      validFrames++;
 
-      if (nose.x < shoulderCenter.x - 0.08) forwardLeanCount++;
-      if (Math.abs(leftShoulder.y - rightShoulder.y) > 0.04) shoulderAsymmetryCount++;
-      if (Math.abs(nose.x - shoulderCenter.x) > 0.06) headTiltCount++;
+      // 1) Наклон корпуса: плечи должны стоять над бёдрами (любая сторона). Используем бёдра.
+      if (Math.abs(shoulderCenter.x - hipCenter.x) > C.torsoLeanThreshold) leanCount++;
+      // 2) Симметрия плеч: разница их высоты.
+      if (Math.abs(leftShoulder.y - rightShoulder.y) > C.shoulderLevelThreshold) shoulderAsymmetryCount++;
+      // 3) Положение головы: смещение носа от центра плеч по горизонтали.
+      if (Math.abs(nose.x - shoulderCenter.x) > C.headCenterThreshold) headOffCount++;
+      // 5) Уверенность: насколько голова поднята над плечами (нос выше → меньше y).
+      headUpSum += (shoulderCenter.y - nose.y);
 
+      // 4) Стабильность: смещение носа между соседними кадрами.
       if (index > 0) {
         const prevNose = poseData[index - 1]?.landmarks?.[0];
         if (prevNose && typeof prevNose.x === 'number') {
-          movementVariance += Math.sqrt(
+          movementSum += Math.sqrt(
             Math.pow(nose.x - prevNose.x, 2) + Math.pow(nose.y - prevNose.y, 2)
           );
+          movementFrames++;
         }
       }
     });
 
-    const fc = poseData.length;
-    const safeFL  = isNaN(forwardLeanCount / fc)   ? 0 : forwardLeanCount / fc;
-    const safeSA  = isNaN(shoulderAsymmetryCount / fc) ? 0 : shoulderAsymmetryCount / fc;
-    const safeHT  = isNaN(headTiltCount / fc)      ? 0 : headTiltCount / fc;
-    const safeMov = isNaN(movementVariance / (fc - 1)) ? 0 : movementVariance / (fc - 1);
+    const fc = Math.max(1, validFrames);
+    const leanRatio   = leanCount / fc;
+    const asymRatio   = shoulderAsymmetryCount / fc;
+    const headOffRatio = headOffCount / fc;
+    const avgMovement = movementFrames > 0 ? movementSum / movementFrames : 0;
+    const avgHeadUp   = headUpSum / fc;
 
-    spineAlignmentScore  = Math.max(0, 40 - safeFL  * 40);
-    shoulderSymmetryScore = Math.max(0, 40 - safeSA  * 40);
-    headPositionScore    = Math.max(0, 40 - safeHT  * 40);
-    stabilityScore       = Math.max(0, 40 - safeMov * 200);
-    confidenceScore      = Math.min(40, (spineAlignmentScore + shoulderSymmetryScore) / 2);
+    const spineAlignmentScore  = COMPONENT_MAX * (1 - leanRatio);
+    const shoulderSymmetryScore = COMPONENT_MAX * (1 - asymRatio);
+    const headPositionScore    = COMPONENT_MAX * (1 - headOffRatio);
+    const stabilityScore       = Math.max(0, COMPONENT_MAX - avgMovement * C.movementPenaltyPerUnit);
+    // Уверенность: голова поднята над плечами на headUpIdeal → 40, на headUpMin и ниже → 0.
+    const confidenceScore = COMPONENT_MAX *
+      clamp01((avgHeadUp - C.headUpMin) / (C.headUpIdeal - C.headUpMin));
 
-    if (safeFL  > 0.3)  issues.push("Частые наклоны вперед");
-    if (safeSA  > 0.2)  issues.push("Асимметрия плеч");
-    if (safeHT  > 0.25) issues.push("Наклоны головы");
-    if (safeMov > 0.02) issues.push("Избыточные движения");
+    if (leanRatio    > C.issue.lean)      issues.push("Наклоны корпуса");
+    if (asymRatio    > C.issue.shoulders) issues.push("Асимметрия плеч");
+    if (headOffRatio > C.issue.head)      issues.push("Голова отклонена в сторону");
+    if (avgMovement  > C.issue.movement)  issues.push("Избыточные движения");
 
     const totalScore = spineAlignmentScore + shoulderSymmetryScore +
                        headPositionScore + stabilityScore + confidenceScore;
@@ -350,41 +369,45 @@ class ScoringService {
       };
     }
 
+    const C = CFG.gesticulation;
     const gestureTypes = new Set<string>();
     const gestureTimestamps: number[] = [];
-    let totalGestures = 0, expressiveGestures = 0, appropriateGesturesCount = 0;
-    const appropriateList = ['Open_Palm', 'Pointing_Up', 'Thumb_Up', 'Victory'];
+    let totalGestures = 0, openGesturesCount = 0, negativeGesturesCount = 0;
 
     gestureData.forEach(frame => {
       frame.gestures.forEach((handGestures: any[]) => {
         handGestures.forEach((gesture: any) => {
-          if (gesture.score > 0.6) {
+          if (gesture.score > C.minGestureConfidence) {
             gestureTypes.add(gesture.categoryName);
             gestureTimestamps.push(frame.timestamp);
             totalGestures++;
-            if (gesture.score > 0.8) expressiveGestures++;
-            if (appropriateList.includes(gesture.categoryName)) appropriateGesturesCount++;
+            // Выразительность: открытые жесты к аудитории (а не «уверенность модели»).
+            if (C.expressiveGestures.includes(gesture.categoryName)) openGesturesCount++;
+            // Уместность снижают только закрытые/негативные жесты.
+            if (C.negativeGestures.includes(gesture.categoryName)) negativeGesturesCount++;
           }
         });
       });
     });
 
     const gestureFrequency = isNaN(totalGestures / videoDuration) ? 0 : totalGestures / videoDuration;
-    const expressivenessRatio  = totalGestures > 0 ? expressiveGestures / totalGestures : 0;
-    const appropriatenessRatio = totalGestures > 0 ? appropriateGesturesCount / totalGestures : 0;
+    // Доля открытых/выразительных жестов.
+    const expressivenessRatio  = totalGestures > 0 ? openGesturesCount / totalGestures : 0;
+    // Уместность = доля НЕ-негативных жестов (всё, кроме закрытого кулака / большого пальца вниз).
+    const appropriatenessRatio = totalGestures > 0 ? (totalGestures - negativeGesturesCount) / totalGestures : 0;
 
-    let coordinationScore = 40;
+    let coordinationScore = COMPONENT_MAX;
     if (gestureTimestamps.length > 1) {
       const intervals = gestureTimestamps.slice(1).map((t, i) => t - gestureTimestamps[i]);
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
       const variance = intervals.reduce((s, i) => s + Math.pow(i - avgInterval, 2), 0) / intervals.length;
-      coordinationScore = Math.max(0, 40 - variance * 10);
+      coordinationScore = Math.max(0, COMPONENT_MAX - variance * C.rhythmPenaltyPerUnit);
     }
 
-    const varietyScore        = Math.min(40, gestureTypes.size * 8);
-    const frequencyScore      = Math.min(40, gestureFrequency * 40);
-    const appropriatenessScore = appropriatenessRatio * 40;
-    const expressivenessScore  = expressivenessRatio * 40;
+    const varietyScore        = Math.min(COMPONENT_MAX, gestureTypes.size * C.varietyPerType);
+    const frequencyScore      = Math.min(COMPONENT_MAX, gestureFrequency * C.frequencyMultiplier);
+    const appropriatenessScore = appropriatenessRatio * COMPONENT_MAX;
+    const expressivenessScore  = expressivenessRatio * COMPONENT_MAX;
     const totalScore = varietyScore + frequencyScore + appropriatenessScore +
                        expressivenessScore + coordinationScore;
 
@@ -409,6 +432,7 @@ class ScoringService {
       };
     }
 
+    const C = CFG.facial;
     let smileCount = 0, eyeContactCount = 0, expressiveCount = 0, authenticityScore = 0;
     const emotionalVariety = new Set<string>();
 
@@ -422,21 +446,21 @@ class ScoringService {
         b.categoryName.includes('mouthRight')
       );
       const maxSmile = Math.max(...smileShapes.map((b: any) => b.score), 0);
-      if (maxSmile > 0.3) { smileCount++; emotionalVariety.add('smile'); }
+      if (maxSmile > C.smileThreshold) { smileCount++; emotionalVariety.add('smile'); }
 
       const lookingAway =
         (bs.find((b: any) => b.categoryName.includes('eyeLookDown'))?.score || 0) +
         (bs.find((b: any) => b.categoryName.includes('eyeLookUp'))?.score   || 0) +
         (bs.find((b: any) => b.categoryName.includes('eyeLookLeft'))?.score  || 0) +
         (bs.find((b: any) => b.categoryName.includes('eyeLookRight'))?.score || 0);
-      if (lookingAway < 0.3) eyeContactCount++;
+      if (lookingAway < C.eyeContactMaxLookAway) eyeContactCount++;
 
       const browShapes = bs.filter((b: any) => b.categoryName.includes('brow'));
       const maxBrow = Math.max(...browShapes.map((b: any) => b.score), 0);
-      if (maxBrow > 0.2) { expressiveCount++; emotionalVariety.add('expressive'); }
+      if (maxBrow > C.browThreshold) { expressiveCount++; emotionalVariety.add('expressive'); }
 
       const totalExpr = maxSmile + maxBrow + lookingAway;
-      if (totalExpr > 0.1 && totalExpr < 0.8) authenticityScore++;
+      if (totalExpr > C.authenticityMin && totalExpr < C.authenticityMax) authenticityScore++;
     });
 
     const fc = faceData.length;
@@ -445,11 +469,11 @@ class ScoringService {
     const safeExpr  = isNaN(expressiveCount / fc)     ? 0 : expressiveCount / fc;
     const safeAuth  = isNaN(authenticityScore / fc)   ? 0 : authenticityScore / fc;
 
-    const expressivenessScore     = Math.min(40, safeExpr  * 80);
-    const eyeContactScore         = safeEye   * 40;
-    const smileFrequencyScore     = Math.min(40, safeSmile * 60);
-    const emotionalRangeScoreNorm = Math.min(40, emotionalVariety.size * 20);
-    const authenticityScoreNorm   = safeAuth  * 40;
+    const expressivenessScore     = Math.min(COMPONENT_MAX, safeExpr  * C.expressivenessMultiplier);
+    const eyeContactScore         = safeEye   * COMPONENT_MAX;
+    const smileFrequencyScore     = Math.min(COMPONENT_MAX, safeSmile * C.smileMultiplier);
+    const emotionalRangeScoreNorm = Math.min(COMPONENT_MAX, emotionalVariety.size * C.emotionalRangePerType);
+    const authenticityScoreNorm   = safeAuth  * COMPONENT_MAX;
 
     const totalScore = expressivenessScore + eyeContactScore + smileFrequencyScore +
                        emotionalRangeScoreNorm + authenticityScoreNorm;
@@ -470,8 +494,10 @@ class ScoringService {
   private analyzeSpeechMetrics(audioData: any, videoDuration: number): SpeechMetrics {
     const transcription = audioData?.transcription || this.generateMockTranscription();
 
+    // \p{L} — буква ЛЮБОГО алфавита (включая кириллицу). Прежний \w вырезал
+    // кириллицу целиком, из-за чего словарь и грамматика всегда были 0.
     const words = transcription.toLowerCase()
-      .replace(/[^\w\s]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, '')
       .split(/\s+/)
       .filter((w: string) => w.length > 0);
 
@@ -501,19 +527,44 @@ class ScoringService {
 
     // --- Скоринг компонентов (каждый из 40 баллов) ---
 
-    const clarityScore = Math.max(0, 40 - fillerRatio * 80);
+    const C = CFG.speech;
 
-    let paceScore = 40;
-    if (safeWPM < 80)        paceScore = (safeWPM / 80) * 30;
-    else if (safeWPM < 120)  paceScore = 30 + ((safeWPM - 80) / 40) * 10;
-    else if (safeWPM > 200)  paceScore = Math.max(0, 40 - ((safeWPM - 200) / 40) * 20);
-    else if (safeWPM > 170)  paceScore = 40 - ((safeWPM - 170) / 30) * 10;
+    const clarityScore = Math.max(0, COMPONENT_MAX - fillerRatio * C.fillerPenalty);
+
+    // Темп: полный балл в коридоре [paceIdealMin..paceIdealMax],
+    // плавный спад при слишком медленной/быстрой речи.
+    let paceScore: number;
+    if (safeWPM >= C.paceIdealMin && safeWPM <= C.paceIdealMax) {
+      paceScore = COMPONENT_MAX;
+    } else if (safeWPM < C.paceIdealMin) {
+      if (safeWPM <= C.paceSlowFloor) {
+        paceScore = (safeWPM / C.paceSlowFloor) * 30;
+      } else {
+        paceScore = 30 + ((safeWPM - C.paceSlowFloor) / (C.paceIdealMin - C.paceSlowFloor)) * 10;
+      }
+    } else { // быстрее идеала
+      if (safeWPM <= C.paceFastCeil) {
+        paceScore = COMPONENT_MAX - ((safeWPM - C.paceIdealMax) / (C.paceFastCeil - C.paceIdealMax)) * 10;
+      } else {
+        paceScore = Math.max(0, 30 - ((safeWPM - C.paceFastCeil) / 40) * 20);
+      }
+    }
 
     const volumeScore = this.calculateVolumeScore(audioData);
 
-    const vocabularyScore = Math.min(40, vocabularyRichness * 80 + avgWordLength * 4);
+    const vocabularyScore = Math.min(COMPONENT_MAX,
+      vocabularyRichness * C.richnessMultiplier + avgWordLength * C.wordLengthMultiplier);
 
-    const grammarScore = Math.min(40, avgSentenceLength * 3);
+    // Связность: оптимальная средняя длина предложения. И слишком короткие
+    // (рубленые), и слишком длинные (сбивчивые) предложения снижают балл.
+    let grammarScore: number;
+    if (avgSentenceLength >= C.sentenceIdealMin && avgSentenceLength <= C.sentenceIdealMax) {
+      grammarScore = COMPONENT_MAX;
+    } else if (avgSentenceLength < C.sentenceIdealMin) {
+      grammarScore = (avgSentenceLength / C.sentenceIdealMin) * COMPONENT_MAX;
+    } else {
+      grammarScore = Math.max(0, COMPONENT_MAX - (avgSentenceLength - C.sentenceIdealMax) * C.sentenceLongPenalty);
+    }
 
     const totalScore = clarityScore + paceScore + volumeScore + vocabularyScore + grammarScore;
 
@@ -537,18 +588,18 @@ class ScoringService {
     const ch = audioData?.characteristics;
     if (!ch) return 20;
 
+    const C = CFG.speech;
     const rms: number | undefined =
       ch.rms ?? ch.averageAmplitude ?? ch.meanAmplitude ?? ch.avgAmplitude ?? ch.amplitude;
 
-    if (rms === undefined || isNaN(rms)) return 20;
+    if (rms === undefined || isNaN(rms)) return C.volumeDefault;
 
-    if (rms < 0.01)  return 5;
-    if (rms < 0.02)  return 12;
-    if (rms < 0.04)  return 20;
-    if (rms < 0.08)  return 28;
-    if (rms < 0.20)  return 38;
-    if (rms < 0.35)  return 40;
-    return Math.max(25, 40 - (rms - 0.35) * 50);
+    for (const band of C.volumeBands) {
+      if (rms < band.maxRms) return band.score;
+    }
+    // Перегруз: тихий спад от максимума.
+    const lastBand = C.volumeBands[C.volumeBands.length - 1];
+    return Math.max(25, COMPONENT_MAX - (rms - lastBand.maxRms) * C.volumeLoudFalloff);
   }
 
   private analyzeEngagementMetrics(
@@ -556,29 +607,29 @@ class ScoringService {
     audioData: any, videoDuration: number
   ): EngagementMetrics {
 
-    let attentionScore = 0;
-    if (poseData.length > 0 && faceData.length > 0) {
-      const poseStability = this.calculatePoseStability(poseData);
-      const eyeContactRatio = this.calculateEyeContactRatio(faceData);
-      attentionScore = Math.min(40, (poseStability + eyeContactRatio) * 20);
-    }
+    const W = CFG.engagement;
 
-    let interactionScore = 0;
-    if (gestureData.length > 0 && faceData.length > 0 && videoDuration > 0) {
-      const gestureActivity = Math.min(1, gestureData.length / (videoDuration * 10));
-      const facialActivity  = Math.min(1, faceData.length  / (videoDuration * 30));
-      interactionScore = Math.min(40, (gestureActivity + facialActivity) * 20);
-    }
+    // Сырые доли (0..1) из разных каналов — единый источник для всех под-параметров.
+    const raw: Record<string, number> = {
+      poseStability:    poseData.length > 0 ? this.calculatePoseStability(poseData) : 0,
+      eyeContact:       faceData.length > 0 ? this.calculateEyeContactRatio(faceData) : 0,
+      gestureActivity:  videoDuration > 0 ? Math.min(1, gestureData.length / (videoDuration * W.gestureActivityDivisor)) : 0,
+      facialActivity:   videoDuration > 0 ? Math.min(1, faceData.length  / (videoDuration * W.facialActivityDivisor)) : 0,
+      speechDynamics:   audioData ? this.calculateSpeechDynamics(audioData) : 0,
+      movementDynamics: poseData.length > 0 ? this.calculateMovementDynamics(poseData) : 0,
+    };
 
-    let energyScore = 20;
-    if (audioData && poseData.length > 0) {
-      const speechDynamics  = this.calculateSpeechDynamics(audioData);
-      const movementDynamics = this.calculateMovementDynamics(poseData);
-      energyScore = Math.min(40, (speechDynamics + movementDynamics) * 20);
-    }
+    // Взвешенная смесь сырых долей → балл под-параметра (веса в конфиге, сумма = 1).
+    const blend = (weights: Record<string, number>): number => {
+      const v = Object.entries(weights).reduce((s, [k, w]) => s + w * (raw[k] ?? 0), 0);
+      return Math.min(COMPONENT_MAX, clamp01(v) * COMPONENT_MAX);
+    };
 
-    const presenceScore = Math.min(40, (attentionScore + interactionScore + energyScore) / 3);
-    const charismaScore = Math.min(40, (attentionScore + interactionScore + energyScore + presenceScore) / 4);
+    const attentionScore   = blend(W.weights.attention);
+    const interactionScore = blend(W.weights.interaction);
+    const energyScore      = blend(W.weights.energy);
+    const presenceScore    = blend(W.weights.presence);   // упор на контакт глаз + спокойствие
+    const charismaScore    = blend(W.weights.charisma);   // упор на динамику речи + жесты
     const totalScore = attentionScore + interactionScore + energyScore + presenceScore + charismaScore;
 
     return {

@@ -11,7 +11,8 @@ import { __setGeminiMode } from './mocks/generative-ai';
 import { __setYandexRaw } from './mocks/axios';
 import {
   yandexRawResponse, audioData, videoDuration,
-  makePoseData, makeGestureData, makeFaceData
+  makePoseData, makeGestureData, makeFaceData,
+  makePoseFrames, makeGesturesOf, audioDataWithText
 } from './fixtures';
 
 // --- окружение, как на сервере ---
@@ -155,6 +156,37 @@ async function main() {
     check('🔧FIX2: transcription заполнен из метрик речи', !!insertData.transcription && insertData.transcription.includes('квадратные'));
     check('🔧FIX2: video_duration заполнен', insertData.video_duration === videoDuration);
     check('total_score сохраняется корректно', insertData.total_score === analysisResults.totalScore);
+  }
+
+  console.log('\n=== ТЕСТ 5: скоринг отличает «хорошо» от «плохо» (после фиксов A) ===');
+  {
+    __setGeminiMode('valid');
+    const score = (pose: any[], gest: any[], face: any[], audio: any) =>
+      scoringService.calculateComprehensiveScore(pose, gest, face, audio, videoDuration);
+
+    // Поза: ровный корпус + поднятая голова  vs  наклон + опущенная голова
+    const goodPose = await score(makePoseFrames({ leanOffset: 0, headUp: 0.18 }), makeGestureData(), makeFaceData(), audioData);
+    const badPose  = await score(makePoseFrames({ leanOffset: 0.18, headUp: 0.04 }), makeGestureData(), makeFaceData(), audioData);
+    const gp = goodPose.metrics.posture, bp = badPose.metrics.posture;
+    console.log(`     осанка: spineAlignment ${gp.spineAlignment} vs ${bp.spineAlignment}, confidence ${gp.confidence} vs ${bp.confidence}`);
+    check('🔧A: ровный корпус > наклонённого (исправлена ось наклона, задействованы бёдра)', gp.spineAlignment > bp.spineAlignment);
+    check('🔧A: поднятая голова > опущенной (confidence — реальный сигнал, не среднее)', gp.confidence > bp.confidence);
+
+    // Жесты: открытая ладонь  vs  сжатый кулак
+    const openG   = await score(makePoseFrames(), makeGesturesOf('Open_Palm'), makeFaceData(), audioData);
+    const closedG = await score(makePoseFrames(), makeGesturesOf('Closed_Fist'), makeFaceData(), audioData);
+    const og = openG.metrics.gesticulation, cg = closedG.metrics.gesticulation;
+    console.log(`     жесты: expressiveness ${og.expressiveness} vs ${cg.expressiveness}, appropriateness ${og.appropriateness} vs ${cg.appropriateness}`);
+    check('🔧A: открытая ладонь выразительнее кулака (не «уверенность модели»)', og.expressiveness > cg.expressiveness);
+    check('🔧A: кулак менее уместен, чем открытый жест', og.appropriateness > cg.appropriateness);
+
+    // Речь: связные предложения  vs  один сбивчивый поток
+    const idealText = 'Сегодня мы изучаем дроби. Дробь это часть целого. Числитель стоит сверху. Знаменатель находится снизу. Давайте решим пример вместе. Откройте тетради и запишите тему.';
+    const runonText = 'Сегодня мы будем изучать дроби и дробь это часть целого числа а числитель это то что стоит сверху над линией дроби тогда как знаменатель находится снизу под чертой и показывает на сколько частей разделили целое поэтому давайте откроем тетради запишем тему урока и попробуем вместе решить несколько простых примеров чтобы лучше понять.';
+    const idealSp = await score(makePoseFrames(), makeGestureData(), makeFaceData(), audioDataWithText(idealText));
+    const runonSp = await score(makePoseFrames(), makeGestureData(), makeFaceData(), audioDataWithText(runonText));
+    console.log(`     речь: grammar ${idealSp.metrics.speech.grammar} vs ${runonSp.metrics.speech.grammar}`);
+    check('🔧A: связная речь > сбивчивого потока (grammar — коридор, не «длиннее=лучше»)', idealSp.metrics.speech.grammar > runonSp.metrics.speech.grammar);
   }
 
   console.log(`\n=================================`);
