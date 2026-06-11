@@ -40,19 +40,16 @@ interface StaggeredMenuProps {
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   position = 'right',
-  colors = ['#B19EEF', '#5227FF'],
   items = [],
   socialItems = [],
   policyItems = [],
   displaySocials = true,
   displayItemNumbering = true,
-  className = '',
   logoUrl = '/logo-book.png',
   menuButtonColor = '#fff',
   openMenuButtonColor = '#fff',
   changeMenuColorOnOpen = true,
   isFixed = false,
-  accentColor = '#70001C',
   closeOnClickAway = true,
   onMenuOpen,
   onMenuClose,
@@ -180,7 +177,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const playClose = useCallback(() => {
     openTlRef.current?.kill();
-    itemEntranceTweenRef.current?.kill();
 
     const panel = panelRef.current;
     const layers = preLayerElsRef.current;

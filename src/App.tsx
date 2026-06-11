@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, BarChart3, Users, Target, TrendingUp, Brain, Sparkles, CircleUser, LogOut, MessageCircle } from 'lucide-react';
+import { Sparkles, CircleUser, LogOut, MessageCircle } from 'lucide-react';
 import UploadSection from './components/UploadSection';
 import AnalysisProgress from './components/AnalysisProgress';
 import ResultsDashboard from './components/ResultsDashboard';
@@ -9,6 +9,7 @@ import Landing from './components/Landing';
 import Profile from './components/Profile';
 import { supabase } from './supabase';
 import { languageService, type SupportedLanguage } from './services/LanguageService';
+import type { ComprehensiveAnalysis } from './services/ScoringService';
 
 // pages
 import Pricing from './pages/Pricing.tsx';
@@ -21,7 +22,7 @@ import About from './pages/About.tsx';
 function App() {
   const [currentStep, setCurrentStep] = useState<'upload' | 'analyzing' | 'results'>('upload');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [analysisResults, setAnalysisResults] = useState(null);
+  const [analysisResults, setAnalysisResults] = useState<ComprehensiveAnalysis | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('ru');
 
   // auth session state

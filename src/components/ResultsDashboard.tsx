@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Star, Download, Share2, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Award, Sparkles } from 'lucide-react';
+import { BarChart3, Star, Download, RotateCcw, Target, Users, Brain, MessageSquare, BookOpen, Award, Sparkles } from 'lucide-react';
 import { ComprehensiveAnalysis } from '../services/ScoringService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { supabase } from '../supabase';
 import { motion } from 'framer-motion';
 import {
   Radar,
@@ -132,7 +131,9 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
       reportElement.style.color = 'black';
 
       // Используем AI отчет ИЛИ fallback данные
-      const hasAiReport = results.aiReport?.professionalReport;
+      const aiReport = results.aiReport;
+      const pr: any = aiReport?.professionalReport;
+      const hasAiReport = pr;
       
       reportElement.innerHTML = `
         <div style="text-align:center;margin-bottom:30px;">
@@ -156,20 +157,20 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
         ${hasAiReport ? `
           <div style="margin-bottom:30px;">
             <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Резюме</h2>
-            <p style="line-height:1.6;color:#333;">${results.aiReport.professionalReport.executiveSummary || 'Нет данных'}</p>
+            <p style="line-height:1.6;color:#333;">${pr.executiveSummary || 'Нет данных'}</p>
           </div>
 
           <div style="margin-bottom:30px;">
             <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Сильные стороны</h2>
             <ul style="line-height:1.8;color:#333;">
-              ${(results.aiReport.professionalReport.detailedAnalysis.strengths || []).map(s => `<li>${s}</li>`).join('')}
+              ${(pr.detailedAnalysis.strengths || []).map((s: string) => `<li>${s}</li>`).join('')}
             </ul>
           </div>
 
           <div style="margin-bottom:30px;">
             <h2 style="font-size:20px;color:#800020;margin-bottom:15px;border-bottom:2px solid #800020;padding-bottom:5px;">Зоны роста</h2>
             <ul style="line-height:1.8;color:#333;">
-              ${(results.aiReport.professionalReport.detailedAnalysis.areasForImprovement || []).map(a => `<li>${a}</li>`).join('')}
+              ${(pr.detailedAnalysis.areasForImprovement || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
           </div>
 
@@ -178,17 +179,17 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
             
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Немедленные действия:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.recommendations.immediate || []).map(r => `<li>${r}</li>`).join('')}
+              ${(pr.recommendations.immediate || []).map((r: string) => `<li>${r}</li>`).join('')}
             </ul>
 
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Краткосрочные цели:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.recommendations.shortTerm || []).map(r => `<li>${r}</li>`).join('')}
+              ${(pr.recommendations.shortTerm || []).map((r: string) => `<li>${r}</li>`).join('')}
             </ul>
 
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Долгосрочные цели:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.recommendations.longTerm || []).map(r => `<li>${r}</li>`).join('')}
+              ${(pr.recommendations.longTerm || []).map((r: string) => `<li>${r}</li>`).join('')}
             </ul>
           </div>
 
@@ -197,27 +198,27 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ results, onReset, o
             
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Неделя 1:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.actionPlan.week1 || []).map(a => `<li>${a}</li>`).join('')}
+              ${(pr.actionPlan.week1 || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
 
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Неделя 2:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.actionPlan.week2 || []).map(a => `<li>${a}</li>`).join('')}
+              ${(pr.actionPlan.week2 || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
 
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Неделя 3:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.actionPlan.week3 || []).map(a => `<li>${a}</li>`).join('')}
+              ${(pr.actionPlan.week3 || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
 
             <h3 style="font-size:16px;color:#666;margin:15px 0 8px 0;">Неделя 4:</h3>
             <ul style="line-height:1.6;color:#333;">
-              ${(results.aiReport.professionalReport.actionPlan.week4 || []).map(a => `<li>${a}</li>`).join('')}
+              ${(pr.actionPlan.week4 || []).map((a: string) => `<li>${a}</li>`).join('')}
             </ul>
           </div>
 
           <div style="background:#f5f5f7;padding:20px;border-radius:12px;margin-top:30px;">
-            <p style="font-style:italic;line-height:1.6;color:#666;text-align:center;">${results.aiReport.motivationalMessage || ''}</p>
+            <p style="font-style:italic;line-height:1.6;color:#666;text-align:center;">${aiReport?.motivationalMessage || ''}</p>
           </div>
         ` : `
           <div style="margin-bottom:30px;">

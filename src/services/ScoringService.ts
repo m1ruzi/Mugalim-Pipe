@@ -106,9 +106,9 @@ class ScoringService {
       return this.getFallbackAnalysis();
     }
     
-    const postureMetrics = this.analyzePostureMetrics(poseData, videoDuration);
+    const postureMetrics = this.analyzePostureMetrics(poseData);
     const gesticulationMetrics = this.analyzeGesticulationMetrics(gestureData, videoDuration);
-    const facialMetrics = this.analyzeFacialMetrics(faceData, videoDuration);
+    const facialMetrics = this.analyzeFacialMetrics(faceData);
     const speechMetrics = this.analyzeSpeechMetrics(audioData, videoDuration);
     const engagementMetrics = this.analyzeEngagementMetrics(
       poseData, gestureData, faceData, audioData, videoDuration
@@ -142,7 +142,7 @@ class ScoringService {
           languageSwitches: audioData.transcriptionMetadata.languageSwitches,
           dominantLanguage: audioData.transcriptionMetadata.detectedLanguages?.[0]?.languageCode
         } : undefined,
-        userLanguage: currentLanguage
+        userLanguage: languageService.getCurrentLanguage()
       };
 
       aiReport = await geminiAIService.generateProfessionalReport(geminiRequest);
@@ -165,7 +165,7 @@ class ScoringService {
       percentage: safePct,
       grade: this.calculateGrade(safePct),
       metrics,
-      overallFeedback: this.generateOverallFeedback(safePct, metrics),
+      overallFeedback: this.generateOverallFeedback(safePct),
       strengths: this.identifyStrengths(metrics),
       priorityAreas: this.identifyPriorityAreas(metrics),
       improvementPlan: this.generateImprovementPlan(metrics),
@@ -262,44 +262,7 @@ class ScoringService {
     return areas.slice(0, 5);
   }
 
-  private async enhanceMetricsWithAI(metrics: DetailedMetrics, language: 'ru' | 'kk'): Promise<void> {
-    try {
-      const enhancementPromises = [
-        this.enhanceMetricWithAI('posture', metrics.posture, language),
-        this.enhanceMetricWithAI('gesticulation', metrics.gesticulation, language),
-        this.enhanceMetricWithAI('facial', metrics.facial, language),
-        this.enhanceMetricWithAI('speech', metrics.speech, language),
-        this.enhanceMetricWithAI('engagement', metrics.engagement, language)
-      ];
-      const results = await Promise.allSettled(enhancementPromises);
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          const metricNames = ['posture', 'gesticulation', 'facial', 'speech', 'engagement'];
-          const metricName = metricNames[index] as keyof DetailedMetrics;
-          (metrics[metricName] as any).aiRecommendations = result.value;
-        }
-      });
-    } catch (error) {
-      console.warn('Failed to enhance metrics with AI:', error);
-    }
-  }
-
-  private async enhanceMetricWithAI(
-    metricType: 'posture' | 'gesticulation' | 'facial' | 'speech' | 'engagement',
-    metricData: any,
-    language: 'ru' | 'kk'
-  ): Promise<string[]> {
-    try {
-      return await geminiAIService.generateEnhancedRecommendations(
-        metricType, metricData.score, metricData.maxScore, metricData, language
-      );
-    } catch (error) {
-      console.warn(`Failed to enhance ${metricType} with AI:`, error);
-      return [];
-    }
-  }
-
-  private analyzePostureMetrics(poseData: any[], videoDuration: number): PostureMetrics {
+  private analyzePostureMetrics(poseData: any[]): PostureMetrics {
     if (poseData.length === 0) {
       return {
         score: 50, maxScore: 200,
@@ -434,7 +397,7 @@ class ScoringService {
     };
   }
 
-  private analyzeFacialMetrics(faceData: any[], videoDuration: number): FacialMetrics {
+  private analyzeFacialMetrics(faceData: any[]): FacialMetrics {
     if (faceData.length === 0) {
       return {
         score: 50, maxScore: 200,
@@ -640,7 +603,7 @@ class ScoringService {
     return 'D';
   }
 
-  private generateOverallFeedback(percentage: number, metrics: DetailedMetrics): string {
+  private generateOverallFeedback(percentage: number): string {
     if (percentage >= 90) return "Превосходное педагогическое мастерство! Вы демонстрируете высокий уровень профессионализма во всех аспектах преподавания. Ваша харизма, отличная осанка, выразительная жестикуляция и грамотная речь создают идеальную атмосферу для обучения.";
     if (percentage >= 85) return "Отличный результат! Большинство аспектов вашего преподавания на высоком уровне. Сосредоточьтесь на небольших улучшениях в областях с более низкими показателями.";
     if (percentage >= 80) return "Очень хороший уровень преподавания! Есть прочная база педагогических навыков. Рекомендуется работа над отдельными аспектами.";

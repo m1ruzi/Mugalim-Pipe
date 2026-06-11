@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Home, Upload, BarChart3, User, Sparkles } from 'lucide-react';
+import { Home, Upload, BarChart3, User } from 'lucide-react';
 
 interface BottomNavProps {
   currentRoute: string;

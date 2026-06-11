@@ -293,7 +293,7 @@ const Profile: React.FC<ProfileProps> = ({ session }) => {
                         </div>
                         <div className="liquid-glass px-3 sm:px-4 py-2">
                           <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Результат</span>
-                          <div className="text-base sm:text-xl font-700 text-gradient">{report.totalScore}/1000</div>
+                          <div className="text-base sm:text-xl font-700 text-gradient">{report.total_score}/1000</div>
                         </div>
                         <div className="liquid-glass px-3 sm:px-4 py-2">
                           <span className="text-[10px] sm:text-xs font-700 uppercase text-[var(--text-secondary)]">Процент</span>

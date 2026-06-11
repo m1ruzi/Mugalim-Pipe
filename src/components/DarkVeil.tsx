@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 
 export default function DarkVeil({
-  hueShift = 0,
   noiseIntensity = 0.15,
   scanlineIntensity = 0.1,
   scanlineFrequency = 0.3,
